@@ -1,0 +1,112 @@
+﻿/* ======== CONTENEDOR GENERAL ======== */
+
+/* Centrar el login y eliminar tanto espacio arriba */
+body, html {
+    height: 100%;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px; /* Ajusta la distancia del navbar */
+    gap: 40px;
+}
+
+/* ======== TITULO LOGIN ======== */
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: -10px;
+    font-weight: 600;
+    font-size: 2rem;
+    color: #1a1a1a;
+}
+
+/* ======== TARJETAS DEL LOGIN ======== */
+
+.col-lg-6 section,
+.col-lg-4 section {
+    background: #ffffff;
+    padding: 35px 40px;
+    border-radius: 14px;
+    box-shadow: 0px 8px 25px rgba(0,0,0,0.08);
+    width: 100%;
+    transition: box-shadow 0.25s ease;
+}
+
+    .col-lg-6 section:hover,
+    .col-lg-4 section:hover {
+        box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
+    }
+
+/* Limitar el ancho total del formulario */
+.col-lg-6 {
+    max-width: 500px;
+}
+
+.col-lg-4 {
+    max-width: 350px;
+}
+
+/* ======== INPUTS ======== */
+
+.form-floating .form-control {
+    border-radius: 10px;
+    padding: 14px 15px;
+    border: 1px solid #bfc5ce;
+    transition: all 0.2s ease-in-out;
+}
+
+    .form-floating .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+    }
+
+/* ======== CHECKBOX ======== */
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ======== BOTÓN PRINCIPAL ======== */
+.btn-primary {
+    height: 48px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+}
+
+/* ======== DIVISORES ======== */
+hr {
+    margin: 20px 0;
+}
+
+.text-secondary {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* ======== ENLACES ======== */
+a {
+    color: #0d6efd;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 992px) {
+    .row {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .col-lg-6, .col-lg-4 {
+        max-width: 90%;
+    }
+}
