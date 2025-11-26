@@ -1,0 +1,77 @@
+﻿@implements IDisposable
+
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+
+        <div class="top-row ps-3 navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold text-warning" href="">ADMIN</a>
+            </div>
+        </div>
+
+        <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+        <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+            <nav class="nav flex-column">
+
+                <!-- EVENTOS -->
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/admin/eventos">
+                        <span class="bi bi-calendar-check"></span> Eventos
+                    </NavLink>
+                </div>
+
+                <!-- SUGERENCIAS -->
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/admin/sugerencias">
+                        <span class="bi bi-chat-left-dots-fill"></span> Sugerencias
+                    </NavLink>
+                </div>
+
+                <!-- USUARIOS -->
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/admin/usuarios">
+                        <span class="bi bi-people-fill"></span> Usuarios
+                    </NavLink>
+                </div>
+
+                <!-- LOGOUT -->
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link text-danger">
+                            <span class="bi bi-box-arrow-right"></span> Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+
+            </nav>
+        </div>
+
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
