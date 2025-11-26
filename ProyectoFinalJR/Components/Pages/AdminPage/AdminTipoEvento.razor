@@ -1,0 +1,136 @@
+﻿@page "/admin/eventos"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject TipoEventoService TipoEventoService
+@inject NavigationManager navigationManager
+
+<PageTitle>Tipos de Eventos</PageTitle>
+
+<div class="container-fluid">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+            <h4 class="card-title m-0">Gestión de Tipos de Eventos</h4>
+            <a href="/admin/tipo-eventos/crear" class="btn btn-warning create-button">
+                <span class="bi bi-plus-circle me-1"></span> Crear Nuevo Tipo
+            </a>
+        </div>
+
+        <div class="card-body">
+            <!-- Sección de Filtros -->
+            <div class="row mb-4">
+                <div class="col-12 col-md-4">
+                    <label class="form-label"><strong>Buscar por Nombre o Descripción</strong></label>
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Escriba aquí para buscar" />
+                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                        <button type="button"
+                                class="btn btn-secondary bi bi-arrow-clockwise"
+                                @onclick="Restablecer">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Resultados -->
+            <div class="table-responsive">
+                @if (ListaTiposEventos == null)
+                {
+                    <p><em>Cargando Tipos de Eventos...</em></p>
+                }
+                else if (!ListaTiposEventos.Any())
+                {
+                    <div class="alert alert-info">No se encontraron Tipos de Eventos.</div>
+                }
+                else
+                {
+                    <table class="table table-hover table-bordered mt-3 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tipo in ListaTiposEventos)
+                            {
+                                <tr>
+                                    <td class="text-center">@tipo.TipoId</td>
+                                    <td>@tipo.Nombre</td>
+                                    <td>@(tipo.Descripcion?.Length > 100 ? tipo.Descripcion.Substring(0, 100) + "..." : tipo.Descripcion)</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/admin/tipo-eventos/editar/@tipo.TipoId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
+                                            <button @onclick="() => EliminarTipoEvento(tipo.TipoId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <label><strong>Total Tipos:</strong> @ListaTiposEventos.Count</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<TipoEvento> ListaTiposEventos { get; set; } = new();
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarLista();
+    }
+
+    private async Task CargarLista()
+    {
+        ListaTiposEventos = await TipoEventoService.GetList(t => true);
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            await CargarLista();
+            return;
+        }
+
+        var filtro = ValorFiltro.ToLower();
+
+        ListaTiposEventos = await TipoEventoService.GetList(
+            t => t.Nombre.ToLower().Contains(filtro) ||
+                 (t.Descripcion != null && t.Descripcion.ToLower().Contains(filtro))
+        );
+    }
+
+    private async Task Restablecer()
+    {
+        ValorFiltro = string.Empty;
+        await CargarLista();
+    }
+
+    private async Task EliminarTipoEvento(int tipoId)
+    {
+        // En una aplicación real, se usaría un modal de confirmación aquí
+        if (await TipoEventoService.Eliminar(tipoId))
+        {
+            // Éxito
+            await CargarLista();
+        }
+        else
+        {
+            // Manejar error de eliminación (ej: error.mensaje)
+        }
+    }
+}
