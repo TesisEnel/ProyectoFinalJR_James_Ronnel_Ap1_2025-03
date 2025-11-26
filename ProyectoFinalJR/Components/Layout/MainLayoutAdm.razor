@@ -41,10 +41,11 @@
 
             </div>
 
-            <div class="nav-section mt-4 pt-3 border-top border-secondary">
+            <div class="nav-item px-3">
                 <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
-                    <button type="submit" class="btn btn-outline-danger w-100">
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="nav-link text-danger">
                         <span class="bi bi-box-arrow-right"></span> Cerrar Sesión
                     </button>
                 </form>
