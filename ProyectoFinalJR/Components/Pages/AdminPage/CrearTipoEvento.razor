@@ -1,0 +1,119 @@
+﻿@page "/admin/tipo-eventos/crear"
+
+@page "/admin/tipo-eventos/editar/{TipoId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject TipoEventoService TipoEventoService
+@inject NavigationManager navigationManager
+
+<PageTitle>@(TipoId == 0 ? "Crear" : "Editar") Tipo de Evento</PageTitle>
+
+<div class="container-fluid">
+    <EditForm EditContext="editContext" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+
+        <div class="card shadow-lg mx-auto" style="max-width: 600px;">
+            <div class="card-header text-center bg-primary text-white">
+                <h5 class="card-title m-0">
+                    <span class="bi bi-calendar-event me-2"></span>
+                    @(TipoId == 0 ? "Crear Nuevo Tipo de Evento" : $"Editar Tipo: {Tipo.Nombre}")
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>ID de Tipo</strong></label>
+                    <InputNumber @bind-Value="Tipo.TipoId" class="form-control" readonly />
+                    <ValidationMessage For="(() => Tipo.TipoId)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombre del Tipo</strong></label>
+                    <InputText class="form-control" @bind-Value="Tipo.Nombre" placeholder="Ej: Boda, Cumpleaños, Conferencia" />
+                    <ValidationMessage For="(() => Tipo.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Descripción</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="Tipo.Descripcion" rows="5" placeholder="Descripción detallada del tipo de evento..." />
+                    <ValidationMessage For="(() => Tipo.Descripcion)" />
+                </div>
+            </div>
+
+            <div class="card-footer text-center d-flex justify-content-between">
+                <a href="/admin/tipo-eventos" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <span class="bi bi-floppy"></span> Guardar
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public int TipoId { get; set; } // 0 para crear, > 0 para editar
+
+    public TipoEvento Tipo { get; set; } = new TipoEvento();
+    private EditContext editContext = default!;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(Tipo);
+    }
+
+    // Al establecer el parámetro, si hay un ID, cargamos el registro
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TipoId > 0)
+        {
+            var encontrado = await TipoEventoService.Buscar(TipoId);
+            if (encontrado != null)
+            {
+                Tipo = encontrado;
+                // Necesario recrear el EditContext para el objeto encontrado
+                editContext = new EditContext(Tipo);
+            }
+            else
+            {
+                // Si no se encuentra, redirige a crear o al listado
+                navigationManager.NavigateTo("/admin/eventos");
+            }
+        }
+        else
+        {
+            // Resetear para una nueva entrada si se navega a /crear
+            Tipo = new TipoEvento();
+            editContext = new EditContext(Tipo);
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (!editContext.Validate())
+        {
+            // toastService?.ShowWarning("Por favor completa correctamente los campos antes de guardar.");
+            return;
+        }
+
+        var creado = await TipoEventoService.Guardar(Tipo);
+
+        if (creado)
+        {
+            // toastService?.ShowSuccess($"Tipo de Evento guardado correctamente: {Tipo.Nombre}");
+            navigationManager.NavigateTo("/admin/eventos");
+        }
+        else
+        {
+            // toastService?.ShowError("Ocurrió un error al intentar guardar el Tipo de Evento.");
+        }
+    }
+}
