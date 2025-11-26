@@ -1,0 +1,88 @@
+﻿/* ==================================== */
+/* Dashboard Enhancements (Nítido)      */
+/* Se aplica solo a Pages/Admin/Dashboard.razor */
+/* ==================================== */
+
+/* Ajuste al encabezado principal */
+.container-fluid h1 {
+    font-weight: 700;
+    color: #1a202c; /* Tono de gris muy oscuro para el texto principal */
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Mejora de la Sombra y Estilo de las Tarjetas */
+.card.shadow {
+    border: none; /* Eliminar el borde feo por defecto */
+    border-radius: 0.75rem; /* Esquinas más suaves */
+    /* Sombra más profunda y moderna */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .card.shadow:hover {
+        transform: translateY(-3px); /* Efecto leve de elevación al pasar el ratón */
+        /* Sombra más intensa al hacer hover */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    }
+
+/* Colores de Borde Izquierdo y Tarjetas */
+/* Haciendo el borde izquierdo más visible y nítido */
+.card.border-left-primary {
+    border-left: 0.3rem solid #007bff !important;
+}
+
+.card.border-left-success {
+    border-left: 0.3rem solid #28a745 !important;
+}
+
+.card.border-left-info {
+    border-left: 0.3rem solid #17a2b8 !important;
+}
+
+.card.border-left-warning {
+    border-left: 0.3rem solid #ffc107 !important;
+}
+
+
+/* Estilos de Tipografía dentro de la Tarjeta */
+.text-xs {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.h5.mb-0 {
+    font-size: 1.75rem;
+    font-weight: 800; /* Números fuertes y prominentes */
+}
+
+/* Estilo para los iconos grandes */
+.col-auto .fa-2x {
+    font-size: 2.2em;
+    color: #cbd5e0 !important; /* Iconos grises suaves */
+}
+
+/* Contenedor de Bienvenida Ampliada */
+.card-header h6 {
+    color: #3182ce !important;
+    font-weight: 600;
+}
+
+.card-body a {
+    color: #4c51bf;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+    .card-body a:hover {
+        color: #667eea;
+        text-decoration: underline;
+    }
+
+/* Ajuste para la barra de progreso */
+.progress {
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #e2e8f0;
+}

@@ -1,0 +1,133 @@
+﻿@page "/admin/dashboard"
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager NavigationManager
+@inherits LayoutComponentBase
+@layout MainLayoutAdm
+
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Dashboard Admin</PageTitle>
+
+<div class="container-fluid">
+    <!-- Encabezado y Saludo -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Panel de Administración</h1>
+    </div>
+
+    
+    <div class="row">
+
+        <!--: Eventos Pendientes -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Eventos Pendientes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">4</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 2: Sugerencias Nuevas -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Sugerencias Nuevas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">12</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-chat-left-dots fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 3: Proveedores Activos -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Proveedores Activos</div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">85%</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                             style="width: 85%" aria-valuenow="85" aria-valuemin="0"
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-truck fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 4: Mensajes de Prueba -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Usuarios Registrados
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Bienvenida Ampliada -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Bienvenido al Panel de Control</h6>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Esta es la vista principal de su sistema de gestión. Utilice el menú de navegación a la izquierda para acceder a:
+                    </p>
+                    <ul>
+                        <li><a href="/admin/eventos">Eventos</a>: Gestión de toda la planificación de eventos.</li>
+                        <li><a href="/admin/proveedores">Proveedores</a>: Control de la lista de servicios y contactos.</li>
+                        <li><a href="/admin/sugerencias">Sugerencias</a>: Revisión y respuesta a los comentarios de los usuarios.</li>
+                    </ul>
+                    <p class="mb-0">
+                        ¡Recuerde verificar sus tareas pendientes y la actividad del sistema regularmente!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+}
