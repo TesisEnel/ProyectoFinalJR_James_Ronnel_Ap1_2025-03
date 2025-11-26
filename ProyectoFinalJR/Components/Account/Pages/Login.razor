@@ -126,8 +126,28 @@
 
         if (result.Succeeded)
         {
-            Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
+            // ====================================================================
+            // === LÓGICA DE REDIRECCIÓN CONDICIONAL AÑADIDA AQUÍ ===
+            // ====================================================================
+
+            // 1. Obtiene el usuario usando el email.
+            var user = await UserManager.FindByEmailAsync(Input.Email);
+
+            if (user != null && await UserManager.IsInRoleAsync(user, "Admin"))
+            {
+                // Si es Admin, redirige a la página de administrador.
+                Logger.LogInformation("User logged in as Admin.");
+                RedirectManager.RedirectTo("/admin/dashboard");
+            }
+            else
+            {
+                // Si no es Admin, usa la redirección por defecto (ReturnUrl).
+                Logger.LogInformation("User logged in.");
+                RedirectManager.RedirectTo(ReturnUrl);
+            }
+            // Retorna aquí para evitar el RedirectManager.RedirectTo(ReturnUrl) duplicado al final.
+            return;
+            // ====================================================================
         }
         else if (result.RequiresTwoFactor)
         {
