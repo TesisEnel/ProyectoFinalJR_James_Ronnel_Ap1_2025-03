@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ProyectoFinalJR.Models;
-using ProyectoFinalJR.Data;
 
 namespace ProyectoFinalJR.Data
 {
@@ -13,12 +12,16 @@ namespace ProyectoFinalJR.Data
         }
 
         public DbSet<TipoEvento> TiposEventos { get; set; } = default!;
-        
+        public DbSet<TipoProveedor> TiposProveedores { get; set; } = default!; 
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<TipoEvento>();
+
+            builder.Entity<TipoProveedor>();
         }
     }
 }
+
