@@ -21,7 +21,6 @@
         </div>
 
         <div class="card-body">
-            <!-- Sección de Filtros -->
             <div class="row mb-4">
                 <div class="col-12 col-md-4">
                     <label class="form-label"><strong>Buscar por Nombre o Descripción</strong></label>
@@ -36,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- Tabla de Resultados -->
             <div class="table-responsive">
                 @if (ListaTiposEventos == null)
                 {
@@ -122,15 +120,12 @@
 
     private async Task EliminarTipoEvento(int tipoId)
     {
-        // En una aplicación real, se usaría un modal de confirmación aquí
         if (await TipoEventoService.Eliminar(tipoId))
         {
-            // Éxito
             await CargarLista();
         }
         else
         {
-            // Manejar error de eliminación (ej: error.mensaje)
         }
     }
 }
