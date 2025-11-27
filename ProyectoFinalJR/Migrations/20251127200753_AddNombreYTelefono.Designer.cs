@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProyectoFinalJR.Data;
 
@@ -11,9 +12,11 @@ using ProyectoFinalJR.Data;
 namespace ProyectoFinalJR.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127200753_AddNombreYTelefono")]
+    partial class AddNombreYTelefono
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -288,13 +291,9 @@ namespace ProyectoFinalJR.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<decimal>("PresupuestoInicial")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TipoEventoId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TipoProveedorId")
                         .HasColumnType("int");
 
                     b.Property<string>("UsuarioId")
@@ -304,8 +303,6 @@ namespace ProyectoFinalJR.Migrations
                     b.HasKey("EventoId");
 
                     b.HasIndex("TipoEventoId");
-
-                    b.HasIndex("TipoProveedorId");
 
                     b.ToTable("Eventos");
                 });
@@ -462,13 +459,7 @@ namespace ProyectoFinalJR.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProyectoFinalJR.Models.TipoProveedor", "TipoProveedor")
-                        .WithMany()
-                        .HasForeignKey("TipoProveedorId");
-
                     b.Navigation("TipoEvento");
-
-                    b.Navigation("TipoProveedor");
                 });
 #pragma warning restore 612, 618
         }

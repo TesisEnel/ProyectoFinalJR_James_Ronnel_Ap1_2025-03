@@ -30,6 +30,8 @@ namespace ProyectoFinalJR.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Telefono = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -62,6 +64,20 @@ namespace ProyectoFinalJR.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TiposEventos", x => x.TipoId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TiposProveedores",
+                columns: table => new
+                {
+                    TipoProveedorId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TiposProveedores", x => x.TipoProveedorId);
                 });
 
             migrationBuilder.CreateTable(
@@ -189,6 +205,33 @@ namespace ProyectoFinalJR.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Eventos",
+                columns: table => new
+                {
+                    EventoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TipoEventoId = table.Column<int>(type: "int", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Fecha = table.Column<DateOnly>(type: "date", nullable: false),
+                    Hora = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Lugar = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    PresupuestoInicial = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Estado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    UsuarioId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Eventos", x => x.EventoId);
+                    table.ForeignKey(
+                        name: "FK_Eventos_TiposEventos_TipoEventoId",
+                        column: x => x.TipoEventoId,
+                        principalTable: "TiposEventos",
+                        principalColumn: "TipoId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -232,6 +275,11 @@ namespace ProyectoFinalJR.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Eventos_TipoEventoId",
+                table: "Eventos",
+                column: "TipoEventoId");
         }
 
         /// <inheritdoc />
@@ -256,13 +304,19 @@ namespace ProyectoFinalJR.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "TiposEventos");
+                name: "Eventos");
+
+            migrationBuilder.DropTable(
+                name: "TiposProveedores");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "TiposEventos");
         }
     }
 }
