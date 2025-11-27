@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProyectoFinalJR.Components;
 using ProyectoFinalJR.Components.Account;
 using ProyectoFinalJR.Data;
+using ProyectoFinalJR.Models;
 using ProyectoFinalJR.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<TipoEventoService>();
+builder.Services.AddScoped<TipoProveedorService>();
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
