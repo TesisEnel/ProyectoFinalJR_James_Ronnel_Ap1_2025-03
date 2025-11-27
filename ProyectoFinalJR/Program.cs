@@ -38,6 +38,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 builder.Services.AddScoped<TipoEventoService>();
 builder.Services.AddScoped<TipoProveedorService>();
 builder.Services.AddScoped<EventoService>();
+builder.Services.AddScoped<CitaService>();
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
