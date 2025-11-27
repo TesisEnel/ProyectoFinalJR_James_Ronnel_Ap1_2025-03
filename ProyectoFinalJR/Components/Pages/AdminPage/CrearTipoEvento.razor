@@ -60,7 +60,7 @@
 
 @code {
     [Parameter]
-    public int TipoId { get; set; } // 0 para crear, > 0 para editar
+    public int TipoId { get; set; }
 
     public TipoEvento Tipo { get; set; } = new TipoEvento();
     private EditContext editContext = default!;
@@ -70,7 +70,6 @@
         editContext = new EditContext(Tipo);
     }
 
-    // Al establecer el parámetro, si hay un ID, cargamos el registro
     protected override async Task OnParametersSetAsync()
     {
         if (TipoId > 0)
@@ -79,18 +78,15 @@
             if (encontrado != null)
             {
                 Tipo = encontrado;
-                // Necesario recrear el EditContext para el objeto encontrado
                 editContext = new EditContext(Tipo);
             }
             else
             {
-                // Si no se encuentra, redirige a crear o al listado
                 navigationManager.NavigateTo("/admin/eventos");
             }
         }
         else
         {
-            // Resetear para una nueva entrada si se navega a /crear
             Tipo = new TipoEvento();
             editContext = new EditContext(Tipo);
         }
@@ -100,7 +96,6 @@
     {
         if (!editContext.Validate())
         {
-            // toastService?.ShowWarning("Por favor completa correctamente los campos antes de guardar.");
             return;
         }
 
@@ -108,12 +103,8 @@
 
         if (creado)
         {
-            // toastService?.ShowSuccess($"Tipo de Evento guardado correctamente: {Tipo.Nombre}");
             navigationManager.NavigateTo("/admin/eventos");
         }
-        else
-        {
-            // toastService?.ShowError("Ocurrió un error al intentar guardar el Tipo de Evento.");
-        }
+       
     }
 }
