@@ -1,0 +1,135 @@
+﻿@page "/admin/citas"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject CitaService CitaService
+@inject NavigationManager navigationManager
+
+<PageTitle>Gestión de Citas y Reservas</PageTitle>
+
+<div class="container-fluid">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center bg-info text-white">
+            <h4 class="card-title m-0">Gestión de Citas Agendadas</h4>
+            <a href="/admin/citas/crear" class="btn btn-warning create-button">
+                <span class="bi bi-calendar-plus me-1"></span> Agendar Nueva Cita
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-12 col-md-4">
+                    <label class="form-label"><strong>Buscar (Evento o Proveedor)</strong></label>
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Escriba aquí para buscar" />
+                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                        <button type="button"
+                                class="btn btn-secondary bi bi-arrow-clockwise"
+                                @onclick="Restablecer">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                @if (ListaCitas == null)
+                {
+                    <p><em>Cargando Citas...</em></p>
+                }
+                else if (!ListaCitas.Any())
+                {
+                    <div class="alert alert-info">No se encontraron Citas.</div>
+                }
+                else
+                {
+                    <table class="table table-hover table-bordered mt-3 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID Cita</th>
+                                <th>Fecha y Hora</th>
+                                <th>Evento Asociado</th>
+                                <th>Proveedor</th>
+                                <th>Usuario ID</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cita in ListaCitas)
+                            {
+                                <tr>
+                                    <td class="text-center">@cita.CitaId</td>
+                                    <td>@cita.FechaCita.ToString("dd-MMM-yyyy") @cita.HoraCita</td>
+                                    <td>@cita.Evento?.Nombre</td> @* Usando la propiedad de navegación Evento *@
+                                    <td>@(cita.Proveedor?.Nombre ?? "Tienda/General")</td> @* Usando la propiedad de navegación Proveedor (puede ser nulo) *@
+                                    <td>@(cita.UsuarioId.Length > 10 ? cita.UsuarioId.Substring(0, 10) + "..." : cita.UsuarioId)</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/admin/citas/editar/@cita.CitaId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
+                                            <button @onclick="() => EliminarCita(cita.CitaId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <label><strong>Total Citas:</strong> @(ListaCitas?.Count ?? 0)</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Cita> ListaCitas { get; set; } = new();
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarLista();
+    }
+
+    private async Task CargarLista()
+    {
+        ListaCitas = await CitaService.GetList(c => true);
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            await CargarLista();
+            return;
+        }
+
+        var filtro = ValorFiltro.ToLower();
+
+        ListaCitas = await CitaService.GetList(
+            c => (c.Evento != null && c.Evento.Nombre.ToLower().Contains(filtro)) ||
+                 (c.Proveedor != null && c.Proveedor.Nombre.ToLower().Contains(filtro))
+        );
+    }
+
+    private async Task Restablecer()
+    {
+        ValorFiltro = string.Empty;
+        await CargarLista();
+    }
+
+    private async Task EliminarCita(int citaId)
+    {
+        if (await CitaService.Eliminar(citaId))
+        {
+            await CargarLista();
+        }
+        else
+        {
+        }
+    }
+}
