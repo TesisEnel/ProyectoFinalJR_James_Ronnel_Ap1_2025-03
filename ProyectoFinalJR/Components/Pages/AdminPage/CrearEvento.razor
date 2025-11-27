@@ -142,7 +142,7 @@
     private EditContext editContext = default!;
     
     public List<TipoEvento> TiposEventos { get; set; } = new();
-    public List<TipoProveedor> TiposProveedores { get; set; } = new(); // <-- Lista para TipoProveedor
+    public List<TipoProveedor> TiposProveedores { get; set; } = new(); 
 
     private string? currentUserId;
     [CascadingParameter]
@@ -156,18 +156,15 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        // 1. Obtener ID del usuario
         var authState = await authenticationStateTask;
         var user = authState.User;
         currentUserId = user.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
 
-        // 2. Cargar listas para Dropdowns
         TiposEventos = await TipoEventoService.GetList(t => true);
-        TiposProveedores = await TipoProveedorService.GetList(t => true); // <-- Cargar Tipos Proveedores
+        TiposProveedores = await TipoProveedorService.GetList(t => true); 
 
         if (EventoId > 0)
         {
-            // --- MODO EDICIÓN ---
             var encontrado = await EventoService.Buscar(EventoId);
             if (encontrado != null)
             {
@@ -181,13 +178,11 @@
         }
         else if (currentUserId != null)
         {
-            // --- MODO CREACIÓN ---
             Evento = new Evento { Fecha = DateOnly.FromDateTime(DateTime.Now), UsuarioId = currentUserId };
             editContext = new EditContext(Evento);
         }
         else
         {
-             // Si no hay usuario, redirige
              navigationManager.NavigateTo("/admin/eventos");
         }
     }
@@ -198,21 +193,11 @@
         {
             return;
         }
-
-        // Asignar el ID del usuario si se perdió (aunque no debería)
+      
         if (string.IsNullOrEmpty(Evento.UsuarioId))
         {
             Evento.UsuarioId = currentUserId ?? "ErrorID";
         }
-        
-        // Manejar el valor nulo/cero para TipoProveedorId (si el usuario selecciona "-- Seleccione --")
-        // InputSelect con value="" para int? resultará en null, pero con value="0" resultará en 0.
-        // Si usas value="", Blazor lo mapea correctamente a null para int?. Si usas value="0", 
-        // debes asegurarte de que el modelo maneje 0 como null si así lo requiere tu lógica de DB.
-        
-        // Si el InputSelect está mapeado a int?, Blazor Server lo maneja. 
-        // Aquí asumimos que Evento.TipoProveedorId (int?) mapea correctamente el valor vacío/cero.
-
 
         var creado = await EventoService.Guardar(Evento);
 
@@ -222,7 +207,7 @@
         }
         else
         {
-            // Manejar error
+            
         }
     }
 }
