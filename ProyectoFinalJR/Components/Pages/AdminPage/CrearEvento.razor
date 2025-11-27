@@ -1,0 +1,228 @@
+﻿@page "/Eventos/Crear"
+@page "/admin/evento/editar/{EventoId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject EventoService EventoService
+@inject TipoEventoService TipoEventoService
+@inject TipoProveedorService TipoProveedorService 
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@(EventoId == 0 ? "Crear" : "Editar") Evento</PageTitle>
+
+<div class="container-fluid">
+    <EditForm EditContext="editContext" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+
+        <div class="card shadow-lg mx-auto" style="max-width: 800px;">
+            <div class="card-header text-center bg-success text-white">
+                <h5 class="card-title m-0">
+                    <span class="bi bi-calendar-check me-2"></span>
+                    @(EventoId == 0 ? "Agendar Nuevo Evento" : $"Editar Evento: {Evento.Nombre}")
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Identificación y Tipos</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>ID de Evento</strong></label>
+                            <InputNumber @bind-Value="Evento.EventoId" class="form-control" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Tipo de Evento (*)</strong></label>
+                            <InputSelect @bind-Value="Evento.TipoEventoId" class="form-select">
+                                <option value="0">-- Seleccione Tipo --</option>
+                                @foreach (var tipo in TiposEventos)
+                                {
+                                    <option value="@tipo.TipoId">@tipo.Nombre</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="(() => Evento.TipoEventoId)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Tipo de Proveedor (Opcional)</strong></label>
+                            <InputSelect @bind-Value="Evento.TipoProveedorId" class="form-select">
+                                <option value="">-- Seleccione Tipo de Proveedor --</option> @* Valor vacío para int? *@
+                                @foreach (var tipoProv in TiposProveedores)
+                                {
+                                    <option value="@tipoProv.TipoProveedorId">@tipoProv.Nombre</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="(() => Evento.TipoProveedorId)" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Tiempo y Finanzas</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Nombre del Evento (*)</strong></label>
+                            <InputText class="form-control" @bind-Value="Evento.Nombre" placeholder="Ej: Boda de Juan y María" />
+                            <ValidationMessage For="(() => Evento.Nombre)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Presupuesto Inicial (*)</strong></label>
+                            <InputNumber class="form-control" @bind-Value="Evento.PresupuestoInicial" TValue="decimal" />
+                            <ValidationMessage For="(() => Evento.PresupuestoInicial)" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><strong>Fecha (*)</strong></label>
+                                <InputDate @bind-Value="Evento.Fecha" class="form-control" />
+                                <ValidationMessage For="(() => Evento.Fecha)" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><strong>Hora (*)</strong></label>
+                                <InputText @bind-Value="Evento.Hora" class="form-control" placeholder="Ej: 19:00 o 7:00 PM" />
+                                <ValidationMessage For="(() => Evento.Hora)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="text-primary border-bottom pb-2 mt-2">Ubicación y Estado</h6>
+                
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label"><strong>Lugar (*)</strong></label>
+                        <InputText class="form-control" @bind-Value="Evento.Lugar" placeholder="Dirección o nombre del salón" />
+                        <ValidationMessage For="(() => Evento.Lugar)" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label"><strong>Estado (*)</strong></label>
+                        <InputText @bind-Value="Evento.Estado" class="form-control" />
+                        <ValidationMessage For="(() => Evento.Estado)" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Descripción</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="Evento.Descripcion" rows="3" placeholder="Detalles, notas, requerimientos especiales..." />
+                    <ValidationMessage For="(() => Evento.Descripcion)" />
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted">ID de Usuario Creador (UsuarioId)</label>
+                    <InputText @bind-Value="Evento.UsuarioId" class="form-control form-control-sm" readonly />
+                </div>
+            </div>
+
+            <div class="card-footer text-center d-flex justify-content-between">
+                <a href="/admin/evento" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <span class="bi bi-floppy"></span> Guardar Evento
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public int EventoId { get; set; }
+
+    public Evento Evento { get; set; } = new Evento();
+    private EditContext editContext = default!;
+    
+    public List<TipoEvento> TiposEventos { get; set; } = new();
+    public List<TipoProveedor> TiposProveedores { get; set; } = new(); // <-- Lista para TipoProveedor
+
+    private string? currentUserId;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        Evento.Fecha = DateOnly.FromDateTime(DateTime.Now);
+        editContext = new EditContext(Evento);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // 1. Obtener ID del usuario
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        currentUserId = user.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+        // 2. Cargar listas para Dropdowns
+        TiposEventos = await TipoEventoService.GetList(t => true);
+        TiposProveedores = await TipoProveedorService.GetList(t => true); // <-- Cargar Tipos Proveedores
+
+        if (EventoId > 0)
+        {
+            // --- MODO EDICIÓN ---
+            var encontrado = await EventoService.Buscar(EventoId);
+            if (encontrado != null)
+            {
+                Evento = encontrado;
+                editContext = new EditContext(Evento);
+            }
+            else
+            {
+                navigationManager.NavigateTo("/admin/eventos");
+            }
+        }
+        else if (currentUserId != null)
+        {
+            // --- MODO CREACIÓN ---
+            Evento = new Evento { Fecha = DateOnly.FromDateTime(DateTime.Now), UsuarioId = currentUserId };
+            editContext = new EditContext(Evento);
+        }
+        else
+        {
+             // Si no hay usuario, redirige
+             navigationManager.NavigateTo("/admin/eventos");
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (!editContext.Validate())
+        {
+            return;
+        }
+
+        // Asignar el ID del usuario si se perdió (aunque no debería)
+        if (string.IsNullOrEmpty(Evento.UsuarioId))
+        {
+            Evento.UsuarioId = currentUserId ?? "ErrorID";
+        }
+        
+        // Manejar el valor nulo/cero para TipoProveedorId (si el usuario selecciona "-- Seleccione --")
+        // InputSelect con value="" para int? resultará en null, pero con value="0" resultará en 0.
+        // Si usas value="", Blazor lo mapea correctamente a null para int?. Si usas value="0", 
+        // debes asegurarte de que el modelo maneje 0 como null si así lo requiere tu lógica de DB.
+        
+        // Si el InputSelect está mapeado a int?, Blazor Server lo maneja. 
+        // Aquí asumimos que Evento.TipoProveedorId (int?) mapea correctamente el valor vacío/cero.
+
+
+        var creado = await EventoService.Guardar(Evento);
+
+        if (creado)
+        {
+            navigationManager.NavigateTo("/admin/eventos");
+        }
+        else
+        {
+            // Manejar error
+        }
+    }
+}
