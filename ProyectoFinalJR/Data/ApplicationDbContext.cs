@@ -13,6 +13,7 @@ namespace ProyectoFinalJR.Data
 
         public DbSet<TipoEvento> TiposEventos { get; set; } = default!;
         public DbSet<TipoProveedor> TiposProveedores { get; set; } = default!; 
+        public DbSet<Evento> Eventos { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -21,6 +22,9 @@ namespace ProyectoFinalJR.Data
             builder.Entity<TipoEvento>();
 
             builder.Entity<TipoProveedor>();
+            builder.Entity<Evento>()
+            .Property(e => e.PresupuestoInicial)
+             .HasPrecision(18, 2);
         }
     }
 }
