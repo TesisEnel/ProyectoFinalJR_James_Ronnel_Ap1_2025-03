@@ -1,0 +1,114 @@
+﻿@page "/admin/tipos-proveedores/crear"
+@page "/admin/tipos-proveedores/editar/{TipoProveedorId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject TipoProveedorService TipoProveedorService
+@inject NavigationManager navigationManager
+
+<PageTitle>@(TipoProveedorId == 0 ? "Crear" : "Editar") Tipo de Proveedor</PageTitle>
+
+<div class="container-fluid">
+    <EditForm EditContext="editContext" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+
+        <div class="card shadow-lg mx-auto" style="max-width: 600px;">
+            <div class="card-header text-center bg-primary text-white">
+                <h5 class="card-title m-0">
+                    <span class="bi bi-person-badge me-2"></span>
+                    @(TipoProveedorId == 0 ? "Crear Nuevo Tipo de Proveedor" : $"Editar Tipo: {TipoProveedor.Nombre}")
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>ID de Tipo de Proveedor</strong></label>
+                    <InputNumber @bind-Value="TipoProveedor.TipoProveedorId" class="form-control" readonly />
+                    <ValidationMessage For="(() => TipoProveedor.TipoProveedorId)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombre del Tipo</strong></label>
+                    <InputText class="form-control" @bind-Value="TipoProveedor.Nombre" placeholder="Ej: Catering, Fotografía, Decoración" />
+                    <ValidationMessage For="(() => TipoProveedor.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Descripción</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="TipoProveedor.Descripcion" rows="5" placeholder="Descripción detallada del tipo de proveedor..." />
+                    <ValidationMessage For="(() => TipoProveedor.Descripcion)" />
+                </div>
+            </div>
+
+            <div class="card-footer text-center d-flex justify-content-between">
+                <a href="/admin/proveedores" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <span class="bi bi-floppy"></span> Guardar
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public int TipoProveedorId { get; set; } 
+
+    public TipoProveedor TipoProveedor { get; set; } = new TipoProveedor();
+    private EditContext editContext = default!;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(TipoProveedor);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TipoProveedorId > 0)
+        {
+            var encontrado = await TipoProveedorService.Buscar(TipoProveedorId);
+
+            if (encontrado != null)
+            {
+                TipoProveedor = encontrado;
+                editContext = new EditContext(TipoProveedor);
+            }
+            else
+            {
+                navigationManager.NavigateTo("/admin/proveedores");
+            }
+        }
+        else
+        {
+            TipoProveedor = new TipoProveedor();
+            editContext = new EditContext(TipoProveedor);
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (!editContext.Validate())
+        {
+            return;
+        }
+
+        var creado = await TipoProveedorService.Guardar(TipoProveedor);
+
+        if (creado)
+        {
+            navigationManager.NavigateTo("/admin/proveedores");
+        }
+        else
+        {
+            Console.WriteLine("Ocurrió un error al intentar guardar el Tipo de Proveedor.");
+        }
+    }
+}
