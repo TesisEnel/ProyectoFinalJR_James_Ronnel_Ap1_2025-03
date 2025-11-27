@@ -1,5 +1,5 @@
 ﻿@page "/Eventos/Crear"
-@page "/admin/evento/editar/{EventoId:int}"
+@page "/admin/eventos/editar/{EventoId:int}"
 @layout MainLayoutAdm
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = "Admin")]
@@ -173,7 +173,7 @@
             }
             else
             {
-                navigationManager.NavigateTo("/admin/eventos");
+                navigationManager.NavigateTo("/admin/evento");
             }
         }
         else if (currentUserId != null)
@@ -183,7 +183,7 @@
         }
         else
         {
-             navigationManager.NavigateTo("/admin/eventos");
+            navigationManager.NavigateTo("/admin/evento");
         }
     }
 
@@ -203,7 +203,7 @@
 
         if (creado)
         {
-            navigationManager.NavigateTo("/admin/eventos");
+            navigationManager.NavigateTo("/admin/evento");
         }
         else
         {
