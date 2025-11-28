@@ -1,5 +1,5 @@
 ﻿@page "/sugerencias"
-@attribute [Authorize(Roles = "Admin, Usuario")]
+@attribute [Authorize(Roles = "Usuario")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -15,18 +15,15 @@
 
             if (user.IsInRole("Admin"))
             {
-                // Si es Admin, va a la bandeja de administración
                 NavigationManager.NavigateTo("/admin/sugerencias", forceLoad: true);
             }
             else if (user.IsInRole("Usuario"))
             {
-                // Si es Usuario, va a la página de creación
                 NavigationManager.NavigateTo("/sugerencias/crear", forceLoad: true);
             }
             else
             {
-                // Si está logueado pero no tiene un rol válido (Admin o Usuario), va a Home
-                NavigationManager.NavigateTo("/", forceLoad: true);
+                NavigationManager.NavigateTo("/admin/dashboard", forceLoad: true);
             }
         }
     </Authorized>
