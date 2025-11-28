@@ -1,0 +1,128 @@
+﻿@page "/admin/sugerencias"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject SugerenciaService SugerenciaService
+@inject NavigationManager navigationManager
+
+<PageTitle>Gestión de Sugerencias y Feedback</PageTitle>
+
+<div class="container-fluid">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center bg-info text-white">
+            <h4 class="card-title m-0">Bandeja de Sugerencias</h4>
+        </div>
+
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-12 col-md-4">
+                    <label class="form-label"><strong>Buscar por Asunto o Descripción</strong></label>
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Escriba aquí para buscar" />
+                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                        <button type="button"
+                                class="btn btn-secondary bi bi-arrow-clockwise"
+                                @onclick="Restablecer">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                @if (ListaSugerencias == null)
+                {
+                    <p><em>Cargando Sugerencias...</em></p>
+                }
+                else if (!ListaSugerencias.Any())
+                {
+                    <div class="alert alert-info">No se encontraron Sugerencias.</div>
+                }
+                else
+                {
+                    <table class="table table-hover table-bordered mt-3 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Asunto</th>
+                                <th>Descripción</th>
+                                <th>Fecha de Envío</th>
+                                <th>Usuario ID</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sugerencia in ListaSugerencias)
+                            {
+                                <tr>
+                                    <td class="text-center">@sugerencia.SugerenciaId</td>
+                                    <td>@sugerencia.Asunto</td>
+                                    <td>@(sugerencia.Descripcion.Length > 80 ? sugerencia.Descripcion.Substring(0, 80) + "..." : sugerencia.Descripcion)</td>
+                                    <td>@sugerencia.FechaCreacion.ToString("dd/MMM/yyyy hh:mm tt")</td>
+                                    <td>@(sugerencia.UsuarioId.Length > 10 ? sugerencia.UsuarioId.Substring(0, 10) + "..." : sugerencia.UsuarioId)</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button @onclick="() => EliminarSugerencia(sugerencia.SugerenciaId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <label><strong>Total Sugerencias:</strong> @(ListaSugerencias?.Count ?? 0)</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Sugerencia> ListaSugerencias { get; set; } = new();
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarLista();
+    }
+
+    private async Task CargarLista()
+    {
+        ListaSugerencias = await SugerenciaService.GetList(s => true);
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            await CargarLista();
+            return;
+        }
+
+        var filtro = ValorFiltro.ToLower();
+
+        ListaSugerencias = await SugerenciaService.GetList(
+            s => s.Asunto.ToLower().Contains(filtro) ||
+                 s.Descripcion.ToLower().Contains(filtro)
+        );
+    }
+
+    private async Task Restablecer()
+    {
+        ValorFiltro = string.Empty;
+        await CargarLista();
+    }
+
+    private async Task EliminarSugerencia(int sugerenciaId)
+    {
+        if (await SugerenciaService.Eliminar(sugerenciaId))
+        {
+            await CargarLista();
+        }
+    }
+}
