@@ -1,0 +1,135 @@
+﻿@page "/admin/pagos"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject PagosDetalleService PagosDetalleService
+@inject NavigationManager navigationManager
+
+<PageTitle>Gestión de Pagos y Transacciones</PageTitle>
+
+<div class="container-fluid">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center bg-info text-white">
+            <h4 class="card-title m-0">Registro de Transacciones de Pago</h4>
+            <a href="/admin/pagos/crear" class="btn btn-warning create-button">
+                <span class="bi bi-cash-coin me-1"></span> Registrar Nuevo Pago
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-12 col-md-4">
+                    <label class="form-label"><strong>Buscar (Método o Evento)</strong></label>
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Escriba aquí para buscar" />
+                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                        <button type="button"
+                                class="btn btn-secondary bi bi-arrow-clockwise"
+                                @onclick="Restablecer">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                @if (ListaPagos == null)
+                {
+                    <p><em>Cargando Registros de Pago...</em></p>
+                }
+                else if (!ListaPagos.Any())
+                {
+                    <div class="alert alert-info">No se encontraron Pagos.</div>
+                }
+                else
+                {
+                    <table class="table table-hover table-bordered mt-3 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID Pago</th>
+                                <th>Evento</th>
+                                <th>Monto</th>
+                                <th>Fecha Pago</th>
+                                <th>Método</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pago in ListaPagos)
+                            {
+                                <tr>
+                                    <td class="text-center">@pago.PagoId</td>
+                                    <td>@pago.Evento?.Nombre</td> 
+                                    <td>@pago.MontoPagado.ToString("C")</td>
+                                    <td>@pago.FechaPago.ToString("dd-MMM-yyyy hh:mm tt")</td>
+                                    <td>@pago.Metodo</td>
+                                    <td>@pago.Estado</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="/admin/pagos/editar/@pago.PagoId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
+                                            <button @onclick="() => EliminarPago(pago.PagoId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <label><strong>Total Pagos:</strong> @(ListaPagos?.Count ?? 0)</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<PagosDetalle> ListaPagos { get; set; } = new();
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarLista();
+    }
+
+    private async Task CargarLista()
+    {
+        ListaPagos = await PagosDetalleService.GetList(p => true);
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            await CargarLista();
+            return;
+        }
+
+        var filtro = ValorFiltro.ToLower();
+
+        ListaPagos = await PagosDetalleService.GetList(
+            p => p.Metodo.ToLower().Contains(filtro) ||
+                 p.Estado.ToLower().Contains(filtro) ||
+                 (p.Evento != null && p.Evento.Nombre.ToLower().Contains(filtro))
+        );
+    }
+
+    private async Task Restablecer()
+    {
+        ValorFiltro = string.Empty;
+        await CargarLista();
+    }
+
+    private async Task EliminarPago(int pagoId)
+    {
+        if (await PagosDetalleService.Eliminar(pagoId))
+        {
+            await CargarLista();
+        }
+    }
+}
