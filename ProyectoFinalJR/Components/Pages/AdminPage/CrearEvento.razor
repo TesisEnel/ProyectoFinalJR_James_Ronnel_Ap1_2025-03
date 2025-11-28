@@ -2,7 +2,7 @@
 @page "/admin/eventos/editar/{EventoId:int}"
 @layout MainLayoutAdm
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, Usuario")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
