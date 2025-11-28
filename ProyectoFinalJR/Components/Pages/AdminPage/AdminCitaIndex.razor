@@ -63,8 +63,8 @@
                                 <tr>
                                     <td class="text-center">@cita.CitaId</td>
                                     <td>@cita.FechaCita.ToString("dd-MMM-yyyy") @cita.HoraCita</td>
-                                    <td>@cita.Evento?.Nombre</td> @* Usando la propiedad de navegación Evento *@
-                                    <td>@(cita.Proveedor?.Nombre ?? "Tienda/General")</td> @* Usando la propiedad de navegación Proveedor (puede ser nulo) *@
+                                    <td>@cita.Evento?.Nombre</td> 
+                                    <td>@(cita.Proveedor?.Nombre ?? "Tienda/General")</td> 
                                     <td>@(cita.UsuarioId.Length > 10 ? cita.UsuarioId.Substring(0, 10) + "..." : cita.UsuarioId)</td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
