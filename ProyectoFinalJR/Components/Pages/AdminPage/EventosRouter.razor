@@ -1,0 +1,35 @@
+﻿@page "/eventos"
+@attribute [Authorize(Roles = "Usuario")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+
+<AuthorizeView>
+    <Authorizing>
+        <p>Verificando permisos de Eventos...</p>
+    </Authorizing>
+    <Authorized>
+        @{
+            var user = context.User;
+
+            if (user.IsInRole("Admin"))
+            {
+                NavigationManager.NavigateTo("/admin/dashboard", forceLoad: true);
+            }
+            else if (user.IsInRole("Usuario"))
+            {
+                NavigationManager.NavigateTo("/Eventos/Crear", forceLoad: true);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/admin/dashboard", forceLoad: true);
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
+        }
+    </NotAuthorized>
+</AuthorizeView>
