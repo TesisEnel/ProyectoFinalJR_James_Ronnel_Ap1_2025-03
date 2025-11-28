@@ -9,7 +9,7 @@ public class SeedData
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        
+        // === ROLES INICIALES ===
         string[] Roles = { "Admin", "Usuario" };
 
         foreach (var role in Roles)
@@ -18,7 +18,8 @@ public class SeedData
                 await roleManager.CreateAsync(new IdentityRole(role));
         }
 
-        
+
+        // === ADMIN INICIAL ===
         string adminEmail = "admin@system.com";
         string adminPassword = "Admin123.";
 
@@ -42,6 +43,34 @@ public class SeedData
             else
             {
                 throw new Exception("No se pudo crear el usuario administrador inicial.");
+            }
+        }
+
+
+        // === USUARIO INICIAL ===
+        string userEmail = "usuario@system.com";
+        string userPassword = "Usuario123.";
+
+        var normalUser = await userManager.FindByEmailAsync(userEmail);
+
+        if (normalUser == null)
+        {
+            normalUser = new ApplicationUser
+            {
+                UserName = userEmail,
+                Email = userEmail,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(normalUser, userPassword);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(normalUser, "Usuario");
+            }
+            else
+            {
+                throw new Exception("No se pudo crear el usuario normal inicial.");
             }
         }
 
