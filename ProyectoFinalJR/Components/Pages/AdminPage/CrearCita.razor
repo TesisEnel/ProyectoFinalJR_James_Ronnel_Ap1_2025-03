@@ -10,7 +10,7 @@
 @using ProyectoFinalJR.Models
 @using ProyectoFinalJR.Services
 @inject CitaService CitaService
-@inject EventoService EventoService 
+@inject EventoDetalleService EventoService 
 @inject TipoProveedorService ProveedorService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -65,7 +65,7 @@
                 <div class="mb-4">
                     <label class="form-label"><strong>Proveedor Específico (Opcional)</strong></label>
                     <InputSelect @bind-Value="Cita.ProveedorId" class="form-select">
-                        <option value="">-- Seleccione Proveedor --</option> @* Valor vacío para int? *@
+                        <option value="">-- Seleccione Proveedor --</option> 
                         @foreach (var proveedor in ListaProveedores)
                         {
                             <option value="@proveedor.TipoProveedorId">@proveedor.Nombre</option>
@@ -99,8 +99,8 @@
 
     public Cita Cita { get; set; } = new Cita();
     private EditContext editContext = default!;
-    
-    public List<Evento> ListaEventos { get; set; } = new();
+
+    public List<EventoDetalle> ListaEventos { get; set; } = new();
     public List<TipoProveedor> ListaProveedores { get; set; } = new(); 
 
     private string? currentUserId;
@@ -109,26 +109,21 @@
 
     protected override void OnInitialized()
     {
-        // Inicializar con la fecha actual y asegurar que el EditContext existe
         Cita.FechaCita = DateOnly.FromDateTime(DateTime.Now);
         editContext = new EditContext(Cita);
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        // 1. Obtener ID del usuario logueado
         var authState = await authenticationStateTask;
         var user = authState.User;
         currentUserId = user.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
 
-        // 2. Cargar listas para Dropdowns
-        // Solo mostramos eventos de este usuario para evitar confusiones, aunque un Admin puede ver todos (c => true)
-        ListaEventos = await EventoService.GetList(e => true); 
-        ListaProveedores = await ProveedorService.GetList(p => true); // Cargar proveedores reales
+        ListaEventos = await EventoService.GetList(e => true);
+        ListaProveedores = await ProveedorService.GetList(p => true);
 
         if (CitaId > 0)
         {
-            // --- MODO EDICIÓN ---
             var encontrado = await CitaService.Buscar(CitaId);
             if (encontrado != null)
             {
@@ -137,20 +132,16 @@
             }
             else
             {
-                // Si no se encuentra, redirige al listado
                 navigationManager.NavigateTo("/admin/citas");
             }
         }
         else if (currentUserId != null)
         {
-            // --- MODO CREACIÓN ---
-            // Aseguramos que el objeto está limpio y tiene el ID del usuario
             Cita = new Cita { FechaCita = DateOnly.FromDateTime(DateTime.Now), UsuarioId = currentUserId };
             editContext = new EditContext(Cita);
         }
         else
         {
-             // Si no hay usuario, redirige
              navigationManager.NavigateTo("/admin/citas");
         }
     }
@@ -161,8 +152,7 @@
         {
             return;
         }
-        
-        // Asignar el UsuarioId en caso de creación (o si se pierde)
+
         if (string.IsNullOrEmpty(Cita.UsuarioId))
         {
             Cita.UsuarioId = currentUserId ?? "ErrorID"; 
@@ -172,12 +162,7 @@
 
         if (creado)
         {
-            // Éxito
             navigationManager.NavigateTo("/admin/citas");
-        }
-        else
-        {
-            // Manejar error de guardado
         }
     }
 }
