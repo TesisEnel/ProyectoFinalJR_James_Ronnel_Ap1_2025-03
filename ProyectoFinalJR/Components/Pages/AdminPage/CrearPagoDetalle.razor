@@ -1,0 +1,159 @@
+﻿@page "/admin/pagos/crear"
+@page "/admin/pagos/editar/{PagoId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject PagosDetalleService PagosDetalleService
+@inject EventoDetalleService EventoService
+@inject NavigationManager navigationManager
+
+<PageTitle>@(PagoId == 0 ? "Registrar" : "Editar") Pago</PageTitle>
+
+<div class="container-fluid">
+    <EditForm EditContext="editContext" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+
+        <div class="card shadow-lg mx-auto" style="max-width: 550px;">
+            <div class="card-header text-center bg-info text-white">
+                <h5 class="card-title m-0">
+                    <span class="bi bi-cash-stack me-2"></span>
+                    @(PagoId == 0 ? "Registrar Nuevo Pago" : $"Editar Pago ID: {Pago.PagoId}")
+                </h5>
+            </div>
+
+            <div class="card-body">
+                @if (PagoId > 0)
+                {
+                    <div class="mb-3">
+                        <label class="form-label"><strong>ID Pago</strong></label>
+                        <InputNumber @bind-Value="Pago.PagoId" class="form-control" readonly />
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Evento Asociado (*)</strong></label>
+                    <InputSelect @bind-Value="Pago.EventoId" class="form-select">
+                        <option value="0">-- Seleccione Evento --</option>
+                        @foreach (var evento in ListaEventos)
+                        {
+                            <option value="@evento.EventoId">@evento.Nombre (@evento.Fecha.ToShortDateString())</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Pago.EventoId)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Monto Pagado (*)</strong></label>
+                    <InputNumber @bind-Value="Pago.MontoPagado" TValue="decimal" class="form-control" placeholder="0.00" />
+                    <ValidationMessage For="(() => Pago.MontoPagado)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Método de Pago (*)</strong></label>
+                    <InputSelect @bind-Value="Pago.Metodo" class="form-select">
+                        <option value="">-- Seleccione Método --</option>
+                        <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
+                        <option value="Transferencia">Transferencia Bancaria</option>
+                        <option value="Efectivo">Efectivo</option>
+                    </InputSelect>
+                    <ValidationMessage For="(() => Pago.Metodo)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Estado del Pago (*)</strong></label>
+                    <InputSelect @bind-Value="Pago.Estado" class="form-select">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Pagado">Pagado</option>
+                        <option value="Rechazado">Rechazado</option>
+                        <option value="Devuelto">Devuelto</option>
+                    </InputSelect>
+                    <ValidationMessage For="(() => Pago.Estado)" />
+                </div>
+
+                @if (PagoId > 0)
+                {
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Fecha de Registro</label>
+                        <input type="text"
+                               value="@(Pago.FechaPago.ToString("dd/MM/yyyy HH:mm"))"
+                               class="form-control form-control-sm" readonly />
+                    </div>
+                }
+            </div>
+
+            <div class="card-footer text-center d-flex justify-content-between">
+                <a href="/admin/pagos" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                </a>
+                <button type="submit" class="btn btn-info text-white">
+                    <span class="bi bi-floppy"></span> Guardar Pago
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public int PagoId { get; set; }
+
+    public PagosDetalle Pago { get; set; } = new PagosDetalle();
+    private EditContext editContext = default!;
+
+    public List<EventoDetalle> ListaEventos { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(Pago);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ListaEventos = await EventoService.GetList(e => true);
+
+        if (PagoId > 0)
+        {
+            var encontrado = await PagosDetalleService.Buscar(PagoId);
+            if (encontrado != null)
+            {
+                Pago = encontrado;
+                editContext = new EditContext(Pago);
+            }
+            else
+            {
+                navigationManager.NavigateTo("/admin/pagos");
+            }
+        }
+        else
+        {
+            Pago = new PagosDetalle();
+            Pago.FechaPago = DateTime.Now;
+            editContext = new EditContext(Pago);
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (!editContext.Validate())
+        {
+            return;
+        }
+
+        var guardado = await PagosDetalleService.Guardar(Pago);
+
+        if (guardado)
+        {
+            navigationManager.NavigateTo("/admin/pagos");
+        }
+        else
+        {
+            // Manejar error de guardado
+        }
+    }
+}
