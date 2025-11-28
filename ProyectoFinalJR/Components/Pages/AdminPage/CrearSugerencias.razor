@@ -1,0 +1,152 @@
+﻿@page "/sugerencias/crear"
+@page "/sugerencias/editar/{SugerenciaId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Usuario")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject SugerenciaService SugerenciaService
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@(SugerenciaId == 0 ? "Enviar" : "Editar") Sugerencia</PageTitle>
+
+<div class="container-fluid">
+    <EditForm EditContext="editContext" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+
+        <div class="card shadow-lg mx-auto" style="max-width: 550px;">
+            <div class="card-header text-center bg-warning text-dark">
+                <h5 class="card-title m-0">
+                    <span class="bi bi-lightbulb me-2"></span>
+                    @(SugerenciaId == 0 ? "Enviar Nueva Sugerencia" : $"Editar Sugerencia ID: {Sugerencia.SugerenciaId}")
+                </h5>
+            </div>
+
+            <div class="card-body">
+                @if (SugerenciaId > 0)
+                {
+                    <div class="mb-3">
+                        <label class="form-label"><strong>ID Sugerencia</strong></label>
+                        <InputNumber @bind-Value="Sugerencia.SugerenciaId" class="form-control" readonly />
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Asunto (*)</strong></label>
+                    <InputText @bind-Value="Sugerencia.Asunto" class="form-control" placeholder="Título corto de la sugerencia" />
+                    <ValidationMessage For="(() => Sugerencia.Asunto)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Descripción (*)</strong></label>
+                    <InputTextArea @bind-Value="Sugerencia.Descripcion" class="form-control" rows="5" placeholder="Detalle su feedback o idea..." />
+                    <ValidationMessage For="(() => Sugerencia.Descripcion)" />
+                </div>
+
+                @if (SugerenciaId > 0)
+                {
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Enviado por Usuario ID</label>
+                        <InputText @bind-Value="Sugerencia.UsuarioId" class="form-control form-control-sm" readonly />
+                    </div>
+                }
+            </div>
+
+            <div class="card-footer text-center d-flex justify-content-between">
+                <a href="@RedireccionUrl" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Cancelar
+                </a>
+                <button type="submit" class="btn btn-warning text-dark">
+                    <span class="bi bi-floppy"></span> @(SugerenciaId == 0 ? "Enviar Sugerencia" : "Guardar Cambios")
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public int SugerenciaId { get; set; }
+
+    public Sugerencia Sugerencia { get; set; } = new Sugerencia();
+    private EditContext editContext = default!;
+
+    private string? currentUserId;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+
+    private string RedireccionUrl => SugerenciaId == 0 ? "/" : "/admin/sugerencias";
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(Sugerencia);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        currentUserId = user.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+        if (SugerenciaId > 0)
+        {
+            var encontrado = await SugerenciaService.Buscar(SugerenciaId);
+            if (encontrado != null)
+            {
+                if (encontrado.UsuarioId == currentUserId)
+                {
+                    Sugerencia = encontrado;
+                    editContext = new EditContext(Sugerencia);
+                }
+                else
+                {
+                    navigationManager.NavigateTo("/");
+                }
+            }
+            else
+            {
+                navigationManager.NavigateTo("/");
+            }
+        }
+        else if (currentUserId != null)
+        {
+            Sugerencia = new Sugerencia { UsuarioId = currentUserId };
+            editContext = new EditContext(Sugerencia);
+        }
+        else
+        {
+            navigationManager.NavigateTo("/Account/Login");
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (!editContext.Validate())
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Sugerencia.UsuarioId))
+        {
+            Sugerencia.UsuarioId = currentUserId ?? throw new InvalidOperationException("User ID is missing.");
+        }
+
+        if (Sugerencia.SugerenciaId == 0)
+        {
+            Sugerencia.FechaCreacion = DateTime.Now;
+        }
+
+        var creado = await SugerenciaService.Guardar(Sugerencia);
+
+        if (creado)
+        {
+            navigationManager.NavigateTo(RedireccionUrl, forceLoad: true);
+        }
+    }
+}
