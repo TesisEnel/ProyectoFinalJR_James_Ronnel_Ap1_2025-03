@@ -1,0 +1,38 @@
+﻿@page "/pagos"
+@attribute [Authorize(Roles = "Usuario")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+
+<AuthorizeView>
+    <Authorizing>
+        <p>Verificando permisos de Pagos...</p>
+    </Authorizing>
+    <Authorized>
+        @{
+            var user = context.User;
+
+            if (user.IsInRole("Admin"))
+            {
+                // Si es Admin, va a la bandeja de gestión de pagos (el índice que ya tienes)
+                NavigationManager.NavigateTo("/admin/dashboard", forceLoad: true);
+            }
+            else if (user.IsInRole("Usuario"))
+            {
+                // Si es Usuario, va directamente a la página de creación de un nuevo pago
+                NavigationManager.NavigateTo("/admin/pagos/crear", forceLoad: true);
+            }
+            else
+            {
+                // Usuario logueado sin rol de gestión, va a un panel general o Home
+                NavigationManager.NavigateTo("/admin/dashboard", forceLoad: true);
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
+        }
+    </NotAuthorized>
+</AuthorizeView>
