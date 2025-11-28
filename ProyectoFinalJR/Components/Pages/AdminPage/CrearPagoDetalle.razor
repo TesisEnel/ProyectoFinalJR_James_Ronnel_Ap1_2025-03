@@ -2,7 +2,7 @@
 @page "/admin/pagos/editar/{PagoId:int}"
 @layout MainLayoutAdm
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, Usuario")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -87,8 +87,8 @@
             </div>
 
             <div class="card-footer text-center d-flex justify-content-between">
-                <a href="/admin/pagos" class="btn btn-secondary">
-                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                <a href="/admin/dashboard" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver 
                 </a>
                 <button type="submit" class="btn btn-info text-white">
                     <span class="bi bi-floppy"></span> Guardar Pago
@@ -149,7 +149,7 @@
 
         if (guardado)
         {
-            navigationManager.NavigateTo("/admin/pagos");
+            navigationManager.NavigateTo("/admin/dashboard");
         }
         else
         {
