@@ -26,24 +26,32 @@
             <div class="nav-section mb-3">
                 <div class="text-uppercase text-secondary small fw-bold mb-2">Gestión</div>
 
-                <NavLink class="nav-link text-light" href="/admin/eventos">
+                <NavLink class="nav-link text-light" href="/admin/evento">
                     <span class="bi bi-calendar-check me-2"></span> Eventos
                 </NavLink>
 
-                <NavLink class="nav-link text-light" href="/admin/proveedores">
-                    <span class="bi bi-truck me-2"></span> Proveedores
-                </NavLink>
-
-                <NavLink class="nav-link text-light" href="/admin/evento">
-                    <span class="bi bi-chat-left-dots me-2"></span> Evento
-                </NavLink>
-
                 <NavLink class="nav-link text-light" href="/admin/citas">
-                    <span class="bi bi-chat-left-dots me-2"></span> Citas
+                    <span class="bi bi-calendar-day me-2"></span> Citas
+                </NavLink>
+
+                <NavLink class="nav-link text-light" href="/admin/pagos">
+                    <span class="bi bi-card-checklist me-2"></span> Pagos
+                </NavLink>
+
+                <NavLink class="nav-link text-light" href="/admin/sugerencias">
+                    <span class="bi bi-lightbulb me-2"></span> Sugerencias
+                </NavLink>
+
+                <NavLink class="nav-link text-light" href="/admin/proveedores">
+                    <span class="bi bi-truck me-2"></span> Tipos Proveedores
+                </NavLink>
+
+                <NavLink class="nav-link text-light" href="/admin/eventos">
+                    <span class="bi bi-card-checklist me-2"></span> Tipos Eventos
                 </NavLink>
 
             </div>
-
+            
             <div class="nav-item px-3">
                 <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
