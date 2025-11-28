@@ -6,7 +6,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using ProyectoFinalJR.Models
 @using ProyectoFinalJR.Services
-@inject EventoService EventoService
+@inject EventoDetalleService EventoService
 @inject NavigationManager navigationManager
 
 <PageTitle>Gestión de Eventos</PageTitle>
@@ -52,7 +52,7 @@
                                 <th>ID</th>
                                 <th>Nombre del Evento</th>
                                 <th>Tipo Evento</th>
-                                <th>Tipo Proveedor</th> @* <-- Nueva columna *@
+                                <th>Tipo Proveedor</th> 
                                 <th>Fecha</th>
                                 <th>Lugar</th>
                                 <th>Presupuesto</th>
@@ -67,7 +67,7 @@
                                     <td class="text-center">@evento.EventoId</td>
                                     <td>@evento.Nombre</td>
                                     <td>@evento.TipoEvento?.Nombre</td>
-                                    <td>@evento.TipoProveedor?.Nombre</td> @* <-- Mostrar TipoProveedor *@
+                                    <td>@evento.TipoProveedor?.Nombre</td>
                                     <td>@evento.Fecha.ToString("dd-MMM-yyyy")</td>
                                     <td>@evento.Lugar</td>
                                     <td>@evento.PresupuestoInicial.ToString("C")</td>
@@ -93,7 +93,7 @@
 </div>
 
 @code {
-    public List<Evento> ListaEventos { get; set; } = new();
+    public List<EventoDetalle> ListaEventos { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -103,7 +103,6 @@
 
     private async Task CargarLista()
     {
-        // El servicio ya incluye TipoEvento y TipoProveedor
         ListaEventos = await EventoService.GetList(e => true);
     }
 
@@ -117,12 +116,11 @@
 
         var filtro = ValorFiltro.ToLower();
 
-        // Buscar por Nombre, Lugar, Descripción O Tipo de Proveedor
         ListaEventos = await EventoService.GetList(
             e => e.Nombre.ToLower().Contains(filtro) ||
                  e.Lugar.ToLower().Contains(filtro) ||
                  (e.Descripcion != null && e.Descripcion.ToLower().Contains(filtro)) ||
-                 (e.TipoProveedor != null && e.TipoProveedor.Nombre.ToLower().Contains(filtro)) // <-- Lógica añadida
+                 (e.TipoProveedor != null && e.TipoProveedor.Nombre.ToLower().Contains(filtro)) 
         );
     }
 
@@ -137,10 +135,6 @@
         if (await EventoService.Eliminar(eventoId))
         {
             await CargarLista();
-        }
-        else
-        {
-            // Manejar error de eliminación
         }
     }
 }
