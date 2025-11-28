@@ -11,7 +11,7 @@
     <div class="admin-sidebar bg-dark text-light" style="width: 250px; min-width: 250px; overflow-y: auto;">
 
         <div class="sidebar-header text-center py-4 border-bottom border-secondary">
-            <h4 class="fw-bold text-warning mb-0">Tu sueno casa de novia</h4>
+            <h4 class="fw-bold text-warning mb-0">Tu sueño casa de novia</h4>
         </div>
 
         <div class="sidebar-content p-3">
@@ -26,36 +26,53 @@
             <div class="nav-section mb-3">
                 <div class="text-uppercase text-secondary small fw-bold mb-2">Gestión</div>
 
-                <NavLink class="nav-link text-light" href="/admin/evento">
-                    <span class="bi bi-calendar-check me-2"></span> Eventos
-                </NavLink>
+                <AuthorizeView Roles="Admin">
+                    <div class="sub-nav-section mb-2">
+                        <div class="text-secondary small fw-bold mb-1 mt-2">Admin Global</div>
 
-                <NavLink class="nav-link text-light" href="/admin/citas">
-                    <span class="bi bi-calendar-day me-2"></span> Citas
-                </NavLink>
+                        <NavLink class="nav-link text-light" href="/admin/eventos">
+                            <span class="bi bi-list-task me-2"></span> Listado Eventos
+                        </NavLink>
+                        <NavLink class="nav-link text-light" href="/admin/citas">
+                            <span class="bi bi-calendar-day me-2"></span> Listado Citas
+                        </NavLink>
+                        <NavLink class="nav-link text-light" href="/admin/pagos">
+                            <span class="bi bi-cash-stack me-2"></span> Listado Pagos
+                        </NavLink>
+                        <NavLink class="nav-link text-light" href="/admin/sugerencias">
+                            <span class="bi bi-lightbulb-fill me-2"></span> Bandeja Sugerencias
+                        </NavLink>
 
-                <NavLink class="nav-link text-light" href="/admin/pagos">
-                    <span class="bi bi-card-checklist me-2"></span> Pagos
-                </NavLink>
+                        <div class="text-secondary small fw-bold mb-1 mt-2">Catálogos</div>
+                        <NavLink class="nav-link text-light" href="/admin/proveedores">
+                            <span class="bi bi-truck me-2"></span> Tipos Proveedores
+                        </NavLink>
+                        <NavLink class="nav-link text-light" href="/admin/eventos">
+                            <span class="bi bi-card-checklist me-2"></span> Tipos Eventos
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
 
-                <NavLink class="nav-link text-light" href="/admin/sugerencias">
-                    <span class="bi bi-lightbulb me-2"></span> Sugerencias
-                </NavLink>
+                <AuthorizeView Roles="Usuario">
+                    <div class="sub-nav-section mb-2">
+                        <div class="text-secondary small fw-bold mb-1 mt-2">Mi Cuenta</div>
 
-                <NavLink class="nav-link text-light" href="/sugerencias">
-                    <span class="bi bi-lightbulb me-2"></span> Sugerencia
-                </NavLink>
+                        <NavLink class="nav-link text-light" href="/eventos">
+                            <span class="bi bi-calendar-plus me-2"></span> Agendar Evento
+                        </NavLink>
 
-                <NavLink class="nav-link text-light" href="/admin/proveedores">
-                    <span class="bi bi-truck me-2"></span> Tipos Proveedores
-                </NavLink>
+                        <NavLink class="nav-link text-light" href="/pagos">
+                            <span class="bi bi-currency-dollar me-2"></span> Realizar Pago
+                        </NavLink>
 
-                <NavLink class="nav-link text-light" href="/admin/eventos">
-                    <span class="bi bi-card-checklist me-2"></span> Tipos Eventos
-                </NavLink>
+                        <NavLink class="nav-link text-light" href="/sugerencias">
+                            <span class="bi bi-chat-left-dots me-2"></span> Enviar Sugerencia
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
 
             </div>
-            
+
             <div class="nav-item px-3">
                 <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
