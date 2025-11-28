@@ -24,7 +24,7 @@ public class Cita
     public int? ProveedorId { get; set; }
 
     [ForeignKey("EventoId")]
-    public Evento? Evento { get; set; }
+    public EventoDetalle? Evento { get; set; }
 
     [ForeignKey("ProveedorId")]
     public TipoProveedor? Proveedor { get; set; }
