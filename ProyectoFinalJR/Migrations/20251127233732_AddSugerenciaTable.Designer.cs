@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProyectoFinalJR.Data;
 
@@ -11,9 +12,11 @@ using ProyectoFinalJR.Data;
 namespace ProyectoFinalJR.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127233732_AddSugerenciaTable")]
+    partial class AddSugerenciaTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -287,7 +290,7 @@ namespace ProyectoFinalJR.Migrations
                     b.ToTable("Citas");
                 });
 
-            modelBuilder.Entity("ProyectoFinalJR.Models.EventoDetalle", b =>
+            modelBuilder.Entity("ProyectoFinalJR.Models.Evento", b =>
                 {
                     b.Property<int>("EventoId")
                         .ValueGeneratedOnAdd()
@@ -343,41 +346,6 @@ namespace ProyectoFinalJR.Migrations
                     b.HasIndex("TipoProveedorId");
 
                     b.ToTable("Eventos");
-                });
-
-            modelBuilder.Entity("ProyectoFinalJR.Models.PagosDetalle", b =>
-                {
-                    b.Property<int>("PagoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PagoId"));
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("EventoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FechaPago")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Metodo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("MontoPagado")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("PagoId");
-
-                    b.HasIndex("EventoId");
-
-                    b.ToTable("PagosDetalle");
                 });
 
             modelBuilder.Entity("ProyectoFinalJR.Models.Sugerencia", b =>
@@ -556,7 +524,7 @@ namespace ProyectoFinalJR.Migrations
 
             modelBuilder.Entity("ProyectoFinalJR.Models.Cita", b =>
                 {
-                    b.HasOne("ProyectoFinalJR.Models.EventoDetalle", "Evento")
+                    b.HasOne("ProyectoFinalJR.Models.Evento", "Evento")
                         .WithMany()
                         .HasForeignKey("EventoId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -571,7 +539,7 @@ namespace ProyectoFinalJR.Migrations
                     b.Navigation("Proveedor");
                 });
 
-            modelBuilder.Entity("ProyectoFinalJR.Models.EventoDetalle", b =>
+            modelBuilder.Entity("ProyectoFinalJR.Models.Evento", b =>
                 {
                     b.HasOne("ProyectoFinalJR.Models.TipoEvento", "TipoEvento")
                         .WithMany()
@@ -586,17 +554,6 @@ namespace ProyectoFinalJR.Migrations
                     b.Navigation("TipoEvento");
 
                     b.Navigation("TipoProveedor");
-                });
-
-            modelBuilder.Entity("ProyectoFinalJR.Models.PagosDetalle", b =>
-                {
-                    b.HasOne("ProyectoFinalJR.Models.EventoDetalle", "Evento")
-                        .WithMany()
-                        .HasForeignKey("EventoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Evento");
                 });
 #pragma warning restore 612, 618
         }
