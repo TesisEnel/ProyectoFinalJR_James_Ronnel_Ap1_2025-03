@@ -31,7 +31,7 @@
 
             <AuthorizeView Roles="Admin">
                 <div class="col-xl-3 col-md-6 mb-4">
-                    <a href="/admin/eventos" class="card-link-wrapper text-decoration-none">
+                    <a href="/admin/evento" class="card-link-wrapper text-decoration-none">
                         <div class="card border-left-primary shadow h-100 py-2">
                             <div class="card-body">
                                 <div class="row no-gutters align-items-center">
@@ -75,7 +75,6 @@
             </AuthorizeView>
 
             <AuthorizeView Roles="Admin">
-                @* Se muestra si el usuario es Admin *@
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-warning shadow h-100 py-2">
                         <div class="card-body">
@@ -123,8 +122,6 @@
 </div>
 
 @code {
-    // Nota: Reemplazar EventoDetalle con el nombre real de tu modelo Evento
-    // (Asumiré Evento es el modelo correcto si EventoDetalle no existe en tu Models namespace)
     public int ConteoEventosPendientes { get; set; } = 0;
     public int ConteoSugerencias { get; set; } = 0;
     public int ConteoUsuarios { get; set; } = 0;
@@ -134,18 +131,12 @@
     {
         try
         {
-            // --- CONTEO DE EVENTOS PENDIENTES ---
-            // Asumo que tu modelo Evento tiene una propiedad 'Estado' con valor "Pendiente"
             var listaEventos = await EventoService.GetList(e => e.Estado == "Pendiente");
             ConteoEventosPendientes = listaEventos?.Count ?? 0;
 
-            // --- CONTEO DE SUGERENCIAS ---
             var listaSugerencias = await SugerenciaService.GetList(s => true);
             ConteoSugerencias = listaSugerencias?.Count ?? 0;
 
-            // --- CONTEO DE USUARIOS (Simulado, ya que requiere UserManager o un servicio) ---
-            // En una aplicación real, usarías el UserManager:
-            // ConteoUsuarios = (await UserManager.GetUsersInRoleAsync("Usuario")).Count;
             ConteoUsuarios = 10; 
 
         }
@@ -157,11 +148,10 @@
 }
 
 <style>
-    /* Estilo para que toda la tarjeta sea clickable */
     .card-link-wrapper {
         display: block;
         height: 100%;
-        color: inherit; /* Mantener color de texto */
+        color: inherit; 
     }
 
         .card-link-wrapper .card {
