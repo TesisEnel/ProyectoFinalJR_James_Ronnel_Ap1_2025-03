@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Authentication states (NECESARIO PARA ROLES)
+// Authentication states
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
@@ -37,8 +37,10 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<TipoEventoService>();
 builder.Services.AddScoped<TipoProveedorService>();
-builder.Services.AddScoped<EventoService>();
+builder.Services.AddScoped<EventoDetalleService>();
 builder.Services.AddScoped<CitaService>();
+builder.Services.AddScoped<SugerenciaService>();
+builder.Services.AddScoped<PagosDetalleService>();
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
