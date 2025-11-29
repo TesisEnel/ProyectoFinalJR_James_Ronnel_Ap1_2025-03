@@ -63,7 +63,7 @@
                             {
                                 <tr>
                                     <td class="text-center">@pago.PagoId</td>
-                                    <td>@pago.Evento?.Nombre</td> 
+                                    <td>@pago.Evento?.Nombre</td>
                                     <td>@pago.MontoPagado.ToString("C")</td>
                                     <td>@pago.FechaPago.ToString("dd-MMM-yyyy hh:mm tt")</td>
                                     <td>@pago.Metodo</td>
@@ -71,7 +71,10 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="/admin/pagos/editar/@pago.PagoId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
-                                            <button @onclick="() => EliminarPago(pago.PagoId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                            <button @onclick="() => AbrirModalEliminar(pago)"
+                                                    class="btn btn-outline-danger btn-sm bi bi-trash"
+                                                    title="Eliminar">
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -88,9 +91,85 @@
     </div>
 </div>
 
+<div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Eliminación de Pago</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (PagoAEliminar != null)
+                {
+                    <p>¿Estás seguro de que deseas eliminar este registro de pago?</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>ID de Pago:</strong> @PagoAEliminar.PagoId</li>
+                        <li class="list-group-item"><strong>Evento:</strong> @PagoAEliminar.Evento?.Nombre</li>
+                        <li class="list-group-item"><strong>Monto:</strong> @PagoAEliminar.MontoPagado.ToString("C")</li>
+                        <li class="list-group-item"><strong>Método:</strong> @PagoAEliminar.Metodo</li>
+                        <li class="list-group-item"><strong>Estado:</strong> @PagoAEliminar.Estado</li>
+                    </ul>
+                    <p class="text-danger">Esta acción no se puede deshacer.</p>
+                }
+                else
+                {
+                    <p>Registro de pago no encontrado.</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarEliminar">
+                    <span class="bi bi-trash me-1"></span> Eliminar Pago
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     public List<PagosDetalle> ListaPagos { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private PagosDetalle? PagoAEliminar { get; set; }
+    private bool ModalIsVisible { get; set; } = false;
+    private string ModalDisplay => ModalIsVisible ? "block" : "none";
+    private string ModalClass => ModalIsVisible ? "show" : "";
+
+    private void AbrirModalEliminar(PagosDetalle pago)
+    {
+        PagoAEliminar = pago;
+        ModalIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CerrarModal()
+    {
+        PagoAEliminar = null;
+        ModalIsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmarEliminar()
+    {
+        if (PagoAEliminar == null)
+        {
+            CerrarModal();
+            return;
+        }
+
+        int id = PagoAEliminar.PagoId;
+        CerrarModal();
+
+        if (await PagosDetalleService.Eliminar(id))
+        {
+            await CargarLista();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -123,13 +202,5 @@
     {
         ValorFiltro = string.Empty;
         await CargarLista();
-    }
-
-    private async Task EliminarPago(int pagoId)
-    {
-        if (await PagosDetalleService.Eliminar(pagoId))
-        {
-            await CargarLista();
-        }
     }
 }
