@@ -63,13 +63,16 @@
                                 <tr>
                                     <td class="text-center">@cita.CitaId</td>
                                     <td>@cita.FechaCita.ToString("dd-MMM-yyyy") @cita.HoraCita</td>
-                                    <td>@cita.Evento?.Nombre</td> 
-                                    <td>@(cita.Proveedor?.Nombre ?? "Tienda/General")</td> 
+                                    <td>@cita.Evento?.Nombre</td>
+                                    <td>@(cita.Proveedor?.Nombre ?? "Tienda/General")</td>
                                     <td>@(cita.UsuarioId.Length > 10 ? cita.UsuarioId.Substring(0, 10) + "..." : cita.UsuarioId)</td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="/admin/citas/editar/@cita.CitaId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
-                                            <button @onclick="() => EliminarCita(cita.CitaId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                            <button @onclick="() => AbrirModalEliminar(cita)"
+                                                    class="btn btn-outline-danger btn-sm bi bi-trash"
+                                                    title="Eliminar">
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -86,9 +89,84 @@
     </div>
 </div>
 
+<div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Eliminación de Cita</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (CitaAEliminar != null)
+                {
+                    <p>¿Estás seguro de que deseas eliminar la siguiente cita?</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>ID:</strong> @CitaAEliminar.CitaId</li>
+                        <li class="list-group-item"><strong>Evento:</strong> @CitaAEliminar.Evento?.Nombre</li>
+                        <li class="list-group-item"><strong>Fecha/Hora:</strong> @CitaAEliminar.FechaCita.ToString("dd-MMM-yyyy") @CitaAEliminar.HoraCita</li>
+                        <li class="list-group-item"><strong>Proveedor:</strong> @(CitaAEliminar.Proveedor?.Nombre ?? "N/A")</li>
+                    </ul>
+                    <p class="text-danger">Esta acción no se puede deshacer.</p>
+                }
+                else
+                {
+                    <p>Cita no encontrada.</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarEliminar">
+                    <span class="bi bi-trash me-1"></span> Eliminar Cita
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     public List<Cita> ListaCitas { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private Cita? CitaAEliminar { get; set; }
+    private bool ModalIsVisible { get; set; } = false;
+    private string ModalDisplay => ModalIsVisible ? "block" : "none";
+    private string ModalClass => ModalIsVisible ? "show" : "";
+
+    private void AbrirModalEliminar(Cita cita)
+    {
+        CitaAEliminar = cita;
+        ModalIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CerrarModal()
+    {
+        CitaAEliminar = null;
+        ModalIsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmarEliminar()
+    {
+        if (CitaAEliminar == null)
+        {
+            CerrarModal();
+            return;
+        }
+
+        int id = CitaAEliminar.CitaId;
+        CerrarModal();
+
+        if (await CitaService.Eliminar(id))
+        {
+            await CargarLista();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,16 +198,5 @@
     {
         ValorFiltro = string.Empty;
         await CargarLista();
-    }
-
-    private async Task EliminarCita(int citaId)
-    {
-        if (await CitaService.Eliminar(citaId))
-        {
-            await CargarLista();
-        }
-        else
-        {
-        }
     }
 }
