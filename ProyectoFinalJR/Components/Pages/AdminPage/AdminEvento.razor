@@ -52,7 +52,7 @@
                                 <th>ID</th>
                                 <th>Nombre del Evento</th>
                                 <th>Tipo Evento</th>
-                                <th>Tipo Proveedor</th> 
+                                <th>Tipo Proveedor</th>
                                 <th>Fecha</th>
                                 <th>Lugar</th>
                                 <th>Presupuesto</th>
@@ -75,7 +75,10 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="/admin/eventos/editar/@evento.EventoId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
-                                            <button @onclick="() => EliminarEvento(evento.EventoId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                            <button @onclick="() => AbrirModalEliminar(evento)"
+                                                    class="btn btn-outline-danger btn-sm bi bi-trash"
+                                                    title="Eliminar">
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -92,9 +95,86 @@
     </div>
 </div>
 
+@* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN *@
+<div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Eliminación de Evento</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (EventoAEliminar != null)
+                {
+                    <p>¿Estás seguro de que deseas eliminar el siguiente evento?</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>ID:</strong> @EventoAEliminar.EventoId</li>
+                        <li class="list-group-item"><strong>Nombre:</strong> @EventoAEliminar.Nombre</li>
+                        <li class="list-group-item"><strong>Tipo:</strong> @EventoAEliminar.TipoEvento?.Nombre</li>
+                        <li class="list-group-item"><strong>Fecha:</strong> @EventoAEliminar.Fecha.ToString("dd-MMM-yyyy")</li>
+                        <li class="list-group-item"><strong>Lugar:</strong> @EventoAEliminar.Lugar</li>
+                    </ul>
+                    <p class="text-danger">Esta acción no se puede deshacer.</p>
+                }
+                else
+                {
+                    <p>Evento no encontrado.</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarEliminar">
+                    <span class="bi bi-trash me-1"></span> Eliminar Evento
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     public List<EventoDetalle> ListaEventos { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private EventoDetalle? EventoAEliminar { get; set; }
+    private bool ModalIsVisible { get; set; } = false;
+    private string ModalDisplay => ModalIsVisible ? "block" : "none";
+    private string ModalClass => ModalIsVisible ? "show" : "";
+
+    private void AbrirModalEliminar(EventoDetalle evento)
+    {
+        EventoAEliminar = evento;
+        ModalIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CerrarModal()
+    {
+        EventoAEliminar = null;
+        ModalIsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmarEliminar()
+    {
+        if (EventoAEliminar == null)
+        {
+            CerrarModal();
+            return;
+        }
+
+        int id = EventoAEliminar.EventoId;
+        CerrarModal();
+
+        if (await EventoService.Eliminar(id))
+        {
+            await CargarLista();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,7 +200,7 @@
             e => e.Nombre.ToLower().Contains(filtro) ||
                  e.Lugar.ToLower().Contains(filtro) ||
                  (e.Descripcion != null && e.Descripcion.ToLower().Contains(filtro)) ||
-                 (e.TipoProveedor != null && e.TipoProveedor.Nombre.ToLower().Contains(filtro)) 
+                 (e.TipoProveedor != null && e.TipoProveedor.Nombre.ToLower().Contains(filtro))
         );
     }
 
@@ -128,13 +208,5 @@
     {
         ValorFiltro = string.Empty;
         await CargarLista();
-    }
-
-    private async Task EliminarEvento(int eventoId)
-    {
-        if (await EventoService.Eliminar(eventoId))
-        {
-            await CargarLista();
-        }
     }
 }
