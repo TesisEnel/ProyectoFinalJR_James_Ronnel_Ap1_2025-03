@@ -1,7 +1,4 @@
-﻿/* ======== CONTENEDOR GENERAL ======== */
-
-/* Centrar el login y eliminar tanto espacio arriba */
-body, html {
+﻿body, html {
     height: 100%;
 }
 
@@ -9,11 +6,9 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 40px; /* Ajusta la distancia del navbar */
+    padding-top: 40px; 
     gap: 40px;
 }
-
-/* ======== TITULO LOGIN ======== */
 h1 {
     text-align: center;
     margin-top: 20px;
@@ -22,8 +17,6 @@ h1 {
     font-size: 2rem;
     color: #1a1a1a;
 }
-
-/* ======== TARJETAS DEL LOGIN ======== */
 
 .col-lg-6 section,
 .col-lg-4 section {
@@ -40,7 +33,6 @@ h1 {
         box-shadow: 0px 12px 30px rgba(0,0,0,0.12);
     }
 
-/* Limitar el ancho total del formulario */
 .col-lg-6 {
     max-width: 500px;
 }
@@ -49,7 +41,6 @@ h1 {
     max-width: 350px;
 }
 
-/* ======== INPUTS ======== */
 
 .form-floating .form-control {
     border-radius: 10px;
@@ -63,21 +54,17 @@ h1 {
         box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
     }
 
-/* ======== CHECKBOX ======== */
 .checkbox {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* ======== BOTÓN PRINCIPAL ======== */
 .btn-primary {
     height: 48px;
     border-radius: 8px;
     font-size: 1.1rem;
 }
-
-/* ======== DIVISORES ======== */
 hr {
     margin: 20px 0;
 }
@@ -87,7 +74,6 @@ hr {
     margin-bottom: 10px;
 }
 
-/* ======== ENLACES ======== */
 a {
     color: #0d6efd;
     font-weight: 500;
@@ -98,7 +84,6 @@ a {
         text-decoration: underline;
     }
 
-/* ======== RESPONSIVE ======== */
 @media (max-width: 992px) {
     .row {
         flex-direction: column;
