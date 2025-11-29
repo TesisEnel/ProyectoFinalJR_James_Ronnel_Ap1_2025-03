@@ -65,7 +65,10 @@
                                     <td>@(sugerencia.UsuarioId.Length > 10 ? sugerencia.UsuarioId.Substring(0, 10) + "..." : sugerencia.UsuarioId)</td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
-                                            <button @onclick="() => EliminarSugerencia(sugerencia.SugerenciaId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                            <button @onclick="() => AbrirModalEliminar(sugerencia)"
+                                                    class="btn btn-outline-danger btn-sm bi bi-trash"
+                                                    title="Eliminar">
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -82,9 +85,84 @@
     </div>
 </div>
 
+<div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Eliminación de Sugerencia</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (SugerenciaAEliminar != null)
+                {
+                    <p>¿Estás seguro de que deseas eliminar la siguiente sugerencia?</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>ID:</strong> @SugerenciaAEliminar.SugerenciaId</li>
+                        <li class="list-group-item"><strong>Asunto:</strong> @SugerenciaAEliminar.Asunto</li>
+                        <li class="list-group-item"><strong>Fecha:</strong> @SugerenciaAEliminar.FechaCreacion.ToString("dd/MMM/yyyy hh:mm tt")</li>
+                        <li class="list-group-item"><strong>Descripción:</strong> @SugerenciaAEliminar.Descripcion</li>
+                    </ul>
+                    <p class="text-danger">Esta acción no se puede deshacer.</p>
+                }
+                else
+                {
+                    <p>Sugerencia no encontrada.</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarEliminar">
+                    <span class="bi bi-trash me-1"></span> Eliminar Sugerencia
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     public List<Sugerencia> ListaSugerencias { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private Sugerencia? SugerenciaAEliminar { get; set; }
+    private bool ModalIsVisible { get; set; } = false;
+    private string ModalDisplay => ModalIsVisible ? "block" : "none";
+    private string ModalClass => ModalIsVisible ? "show" : "";
+
+    private void AbrirModalEliminar(Sugerencia sugerencia)
+    {
+        SugerenciaAEliminar = sugerencia;
+        ModalIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CerrarModal()
+    {
+        SugerenciaAEliminar = null;
+        ModalIsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmarEliminar()
+    {
+        if (SugerenciaAEliminar == null)
+        {
+            CerrarModal();
+            return;
+        }
+
+        int id = SugerenciaAEliminar.SugerenciaId;
+        CerrarModal();
+
+        if (await SugerenciaService.Eliminar(id))
+        {
+            await CargarLista();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,13 +194,5 @@
     {
         ValorFiltro = string.Empty;
         await CargarLista();
-    }
-
-    private async Task EliminarSugerencia(int sugerenciaId)
-    {
-        if (await SugerenciaService.Eliminar(sugerenciaId))
-        {
-            await CargarLista();
-        }
     }
 }
