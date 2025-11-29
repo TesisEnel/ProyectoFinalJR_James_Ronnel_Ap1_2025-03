@@ -37,7 +37,7 @@
                 }
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Evento Asociado (*)</strong></label>
+                    <label class="form-label"><strong>Evento Asociado </strong></label>
                     <InputSelect @bind-Value="Pago.EventoId" class="form-select">
                         <option value="0">-- Seleccione Evento --</option>
                         @foreach (var evento in ListaEventos)
@@ -49,13 +49,13 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Monto Pagado (*)</strong></label>
+                    <label class="form-label"><strong>Monto Pagado </strong></label>
                     <InputNumber @bind-Value="Pago.MontoPagado" TValue="decimal" class="form-control" placeholder="0.00" />
                     <ValidationMessage For="(() => Pago.MontoPagado)" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Método de Pago (*)</strong></label>
+                    <label class="form-label"><strong>Método de Pago </strong></label>
                     <InputSelect @bind-Value="Pago.Metodo" class="form-select">
                         <option value="">-- Seleccione Método --</option>
                         <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
@@ -67,31 +67,43 @@
                 @if (Pago.Metodo == "Tarjeta")
                 {
                     <div class="mb-3">
-                        <label class="form-label"><strong>Número de Tarjeta (*)</strong></label>
+                        <label class="form-label"><strong>Número de Tarjeta </strong></label>
                         <InputText @bind-Value="InputTarjeta.NumeroTarjeta" class="form-control" maxlength="16" placeholder="0000 0000 0000 0000" />
                         <ValidationMessage For="() => InputTarjeta.NumeroTarjeta" />
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label"><strong>Fecha de Vencimiento (MM/AA) (*)</strong></label>
+                            <label class="form-label"><strong>Fecha de Vencimiento (MM/AA) </strong></label>
                             <InputText @bind-Value="InputTarjeta.FechaVencimiento" class="form-control" maxlength="5" placeholder="MM/AA" />
                             <ValidationMessage For="() => InputTarjeta.FechaVencimiento" />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label"><strong>CVV (*)</strong></label>
+                            <label class="form-label"><strong>CVV </strong></label>
                             <InputText @bind-Value="InputTarjeta.CVV" class="form-control" maxlength="4" placeholder="CVC/CVV" />
                             <ValidationMessage For="() => InputTarjeta.CVV" />
                         </div>
                     </div>
                 }
                 <div class="mb-3">
-                    <label class="form-label"><strong>Estado del Pago (*)</strong></label>
-                    <InputSelect @bind-Value="Pago.Estado" class="form-select">
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Pagado">Pagado</option>
-                        <option value="Rechazado">Rechazado</option>
-                        <option value="Devuelto">Devuelto</option>
+                    <label class="form-label"><strong>Estado del Pago </strong></label>
+                    <InputSelect @bind-Value="Pago.Estado" class="form-select" disabled="@(PagoId == 0)">
+
+                        @if (PagoId == 0)
+                        {
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Pagado" disabled>Pagado (Deshabilitado)</option>
+                            <option value="Rechazado" disabled>Rechazado (Deshabilitado)</option>
+                            <option value="Devuelto" disabled>Devuelto (Deshabilitado)</option>
+                        }
+                        else
+                        {
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Pagado">Pagado</option>
+                            <option value="Rechazado">Rechazado</option>
+                            <option value="Devuelto">Devuelto</option>
+                        }
+
                     </InputSelect>
                     <ValidationMessage For="(() => Pago.Estado)" />
                 </div>
@@ -249,10 +261,6 @@
         if (guardado)
         {
             navigationManager.NavigateTo("/admin/dashboard");
-        }
-        else
-        {
-
         }
     }
 
