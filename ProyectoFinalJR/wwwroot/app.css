@@ -58,3 +58,13 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+.btn-gold {
+    background-color: #FFD700 !important; 
+    border-color: #FFD700 !important;
+    color: #000000 !important; 
+}
+
+    .btn-gold:hover {
+        background-color: #E6C200 !important; 
+        border-color: #E6C200 !important;
+    }
