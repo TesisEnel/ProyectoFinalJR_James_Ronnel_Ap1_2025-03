@@ -1,5 +1,4 @@
 ﻿@page "/admin/tipo-eventos/crear"
-
 @page "/admin/tipo-eventos/editar/{TipoId:int}"
 @layout MainLayoutAdm
 @rendermode InteractiveServer
@@ -18,7 +17,8 @@
         <DataAnnotationsValidator />
 
         <div class="card shadow-lg mx-auto" style="max-width: 600px;">
-            <div class="card-header text-center bg-primary text-white">
+
+            <div class="card-header text-center text-white" style="background-color: #01206E;">
                 <h5 class="card-title m-0">
                     <span class="bi bi-calendar-event me-2"></span>
                     @(TipoId == 0 ? "Crear Nuevo Tipo de Evento" : $"Editar Tipo: {Tipo.Nombre}")
@@ -49,7 +49,7 @@
                 <a href="/admin/eventos" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Volver al Listado
                 </a>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-success">
                     <span class="bi bi-floppy"></span> Guardar
                 </button>
             </div>
@@ -105,6 +105,6 @@
         {
             navigationManager.NavigateTo("/admin/eventos");
         }
-       
+
     }
 }
