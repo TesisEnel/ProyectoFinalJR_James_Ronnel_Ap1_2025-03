@@ -15,8 +15,8 @@
     <div class="card shadow-lg">
         <div class="card-header d-flex justify-content-between align-items-center text-white" style="background-color: #01206E !important;">
             <h4 class="card-title m-0">Gestión de Tipos de Proveedores</h4>
-            <a href="/admin/tipos-proveedores/crear" class="btn btn-gold create-button">
-                <span class="bi bi-calendar-plus me-1"></span>
+            <a href="/admin/tipos-proveedores/crear" class="btn btn-warning create-button">
+                <span class="bi bi-calendar-plus me-1"></span> 
             </a>
         </div>
 
@@ -28,8 +28,8 @@
                         <input class="form-control" @bind="ValorFiltro" placeholder="Escriba aquí para buscar" />
                         <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
                         <button type="button"
-                                                class="btn btn-secondary bi bi-arrow-clockwise"
-                                                @onclick="Restablecer">
+                                class="btn btn-secondary bi bi-arrow-clockwise"
+                                @onclick="Restablecer">
                         </button>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="/admin/tipos-proveedores/editar/@tipo.TipoProveedorId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
-                                            <button @onclick="() => EliminarTipoProveedor(tipo.TipoProveedorId)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
+                                            <button @onclick="() => AbrirModalEliminar(tipo)" class="btn btn-outline-danger btn-sm bi bi-trash" title="Eliminar"></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -77,14 +77,94 @@
         </div>
 
         <div class="card-footer d-flex justify-content-between">
-            <label><strong>Total Tipos:</strong> @(ListaTiposProveedores != null ? ListaTiposProveedores.Count : 0)</label>
+            <label><strong>Total Tipos:</strong> @(ListaTiposProveedores?.Count ?? 0)</label>
         </div>
     </div>
 </div>
 
+<div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Eliminación de Tipo</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (TipoAEliminar != null)
+                {
+                    <p>¿Estás seguro de que deseas eliminar el siguiente tipo de proveedor?</p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>ID:</strong> @TipoAEliminar.TipoProveedorId</li>
+                        <li class="list-group-item"><strong>Nombre:</strong> @TipoAEliminar.Nombre</li>
+                        <li class="list-group-item"><strong>Descripción:</strong> @TipoAEliminar.Descripcion</li>
+                    </ul>
+                    <p class="text-danger">Esta acción no se puede deshacer.</p>
+                }
+                else
+                {
+                    <p>Tipo de proveedor no encontrado.</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmarEliminar">
+                    <span class="bi bi-trash me-1"></span> Eliminar Tipo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
-    public List<TipoProveedor> ListaTiposProveedores { get; set; } = new();
+    public List<TipoProveedor> ListaTiposProveedores { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private TipoProveedor? TipoAEliminar { get; set; }
+    private bool ModalIsVisible { get; set; } = false;
+    private string ModalDisplay => ModalIsVisible ? "block" : "none";
+    private string ModalClass => ModalIsVisible ? "show" : "";
+
+    private void AbrirModalEliminar(TipoProveedor tipo)
+    {
+        TipoAEliminar = tipo;
+        ModalIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CerrarModal()
+    {
+        TipoAEliminar = null;
+        ModalIsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmarEliminar()
+    {
+        if (TipoAEliminar == null)
+        {
+            CerrarModal();
+            return;
+        }
+
+        int id = TipoAEliminar.TipoProveedorId;
+        CerrarModal();
+
+        bool eliminado = await TipoProveedorService.Eliminar(id);
+
+        if (eliminado)
+        {
+            await CargarLista();
+        }
+        else
+        {
+            Console.WriteLine($"Error al eliminar el Tipo de Proveedor con ID: {id}");
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -107,8 +187,8 @@
         var filtro = ValorFiltro.ToLower();
 
         ListaTiposProveedores = await TipoProveedorService.GetList(
-          t => t.Nombre.ToLower().Contains(filtro) ||
-            (t.Descripcion != null && t.Descripcion.ToLower().Contains(filtro))
+            t => t.Nombre.ToLower().Contains(filtro) ||
+                 (t.Descripcion != null && t.Descripcion.ToLower().Contains(filtro))
         );
     }
 
@@ -116,19 +196,5 @@
     {
         ValorFiltro = string.Empty;
         await CargarLista();
-    }
-
-    private async Task EliminarTipoProveedor(int tipoProveedorId)
-    {
-        bool eliminado = await TipoProveedorService.Eliminar(tipoProveedorId);
-
-        if (eliminado)
-        {
-            await CargarLista();
-        }
-        else
-        {
-            Console.WriteLine($"Error al eliminar el Tipo de Proveedor con ID: {tipoProveedorId}");
-        }
     }
 }
