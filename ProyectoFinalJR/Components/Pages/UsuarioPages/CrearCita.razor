@@ -1,0 +1,168 @@
+﻿@page "/admin/citas/crear"
+@page "/admin/citas/editar/{CitaId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject CitaService CitaService
+@inject EventoDetalleService EventoService
+@inject TipoProveedorService ProveedorService
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@(CitaId == 0 ? "Agendar" : "Editar") Cita/Reserva</PageTitle>
+
+<div class="container-fluid">
+    <EditForm EditContext="editContext" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+
+        <div class="card shadow-lg mx-auto" style="max-width: 650px;">
+            <div class="card-header text-center text-white" style="background-color: #01206E;">
+                <h5 class="card-title m-0">
+                    <span class="bi bi-calendar-check me-2"></span>
+                    @(CitaId == 0 ? "Agendar Nueva Cita" : $"Editar Cita ID: {Cita.CitaId}")
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label"><strong>ID Cita</strong></label>
+                        <InputNumber @bind-Value="Cita.CitaId" class="form-control" readonly />
+                    </div>
+
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label"><strong>Evento Asociado </strong></label>
+                        <InputSelect @bind-Value="Cita.EventoId" class="form-select">
+                            <option value="0">-- Seleccione Evento --</option>
+                            @foreach (var evento in ListaEventos)
+                            {
+                                <option value="@evento.EventoId">@evento.Nombre (@evento.Fecha.ToShortDateString())</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="(() => Cita.EventoId)" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Fecha de la Cita </strong></label>
+                        <InputDate @bind-Value="Cita.FechaCita" class="form-control" />
+                        <ValidationMessage For="(() => Cita.FechaCita)" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Hora de la Cita </strong></label>
+                        <InputText @bind-Value="Cita.HoraCita" class="form-control" placeholder="Ej: 14:30" />
+                        <ValidationMessage For="(() => Cita.HoraCita)" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label"><strong>Proveedor Específico (Opcional)</strong></label>
+                    <InputSelect @bind-Value="Cita.ProveedorId" class="form-select">
+                        <option value="">-- Seleccione Proveedor --</option>
+                        @foreach (var proveedor in ListaProveedores)
+                        {
+                            <option value="@proveedor.TipoProveedorId">@proveedor.Nombre</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Cita.ProveedorId)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-muted">ID de Usuario Creador (UsuarioId)</label>
+                    <InputText @bind-Value="Cita.UsuarioId" class="form-control form-control-sm" readonly />
+                </div>
+            </div>
+
+            <div class="card-footer text-center d-flex justify-content-between">
+                <a href="/admin/citas" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <span class="bi bi-floppy"></span> Guardar Cita
+                </button>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+@code {
+    [Parameter]
+    public int CitaId { get; set; }
+
+    public Cita Cita { get; set; } = new Cita();
+    private EditContext editContext = default!;
+
+    public List<EventoDetalle> ListaEventos { get; set; } = new();
+    public List<TipoProveedor> ListaProveedores { get; set; } = new();
+
+    private string? currentUserId;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        Cita.FechaCita = DateOnly.FromDateTime(DateTime.Now);
+        editContext = new EditContext(Cita);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        currentUserId = user.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+        ListaEventos = await EventoService.GetList(e => true);
+        ListaProveedores = await ProveedorService.GetList(p => true);
+
+        if (CitaId > 0)
+        {
+            var encontrado = await CitaService.Buscar(CitaId);
+            if (encontrado != null)
+            {
+                Cita = encontrado;
+                editContext = new EditContext(Cita);
+            }
+            else
+            {
+                navigationManager.NavigateTo("/admin/citas");
+            }
+        }
+        else if (currentUserId != null)
+        {
+            Cita = new Cita { FechaCita = DateOnly.FromDateTime(DateTime.Now), UsuarioId = currentUserId };
+            editContext = new EditContext(Cita);
+        }
+        else
+        {
+            navigationManager.NavigateTo("/admin/citas");
+        }
+    }
+
+    public async Task Guardar()
+    {
+        if (!editContext.Validate())
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(Cita.UsuarioId))
+        {
+            Cita.UsuarioId = currentUserId ?? "ErrorID";
+        }
+
+        var creado = await CitaService.Guardar(Cita);
+
+        if (creado)
+        {
+            navigationManager.NavigateTo("/admin/citas");
+        }
+    }
+}
