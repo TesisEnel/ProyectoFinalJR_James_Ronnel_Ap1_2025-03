@@ -37,7 +37,7 @@
                 }
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Evento Asociado </strong></label>
+                    <label class="form-label"><strong>Evento Asociado (*)</strong></label>
                     <InputSelect @bind-Value="Pago.EventoId" class="form-select">
                         <option value="0">-- Seleccione Evento --</option>
                         @foreach (var evento in ListaEventos)
@@ -49,13 +49,13 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Monto Pagado </strong></label>
+                    <label class="form-label"><strong>Monto Pagado (*)</strong></label>
                     <InputNumber @bind-Value="Pago.MontoPagado" TValue="decimal" class="form-control" placeholder="0.00" />
                     <ValidationMessage For="(() => Pago.MontoPagado)" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Método de Pago </strong></label>
+                    <label class="form-label"><strong>Método de Pago (*)</strong></label>
                     <InputSelect @bind-Value="Pago.Metodo" class="form-select">
                         <option value="">-- Seleccione Método --</option>
                         <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
@@ -67,26 +67,26 @@
                 @if (Pago.Metodo == "Tarjeta")
                 {
                     <div class="mb-3">
-                        <label class="form-label"><strong>Número de Tarjeta </strong></label>
+                        <label class="form-label"><strong>Número de Tarjeta (*)</strong></label>
                         <InputText @bind-Value="InputTarjeta.NumeroTarjeta" class="form-control" maxlength="16" placeholder="0000 0000 0000 0000" />
                         <ValidationMessage For="() => InputTarjeta.NumeroTarjeta" />
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label"><strong>Fecha de Vencimiento (MM/AA) </strong></label>
+                            <label class="form-label"><strong>Fecha de Vencimiento (MM/AA) (*)</strong></label>
                             <InputText @bind-Value="InputTarjeta.FechaVencimiento" class="form-control" maxlength="5" placeholder="MM/AA" />
                             <ValidationMessage For="() => InputTarjeta.FechaVencimiento" />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label"><strong>CVV </strong></label>
+                            <label class="form-label"><strong>CVV (*)</strong></label>
                             <InputText @bind-Value="InputTarjeta.CVV" class="form-control" maxlength="4" placeholder="CVC/CVV" />
                             <ValidationMessage For="() => InputTarjeta.CVV" />
                         </div>
                     </div>
                 }
                 <div class="mb-3">
-                    <label class="form-label"><strong>Estado del Pago </strong></label>
+                    <label class="form-label"><strong>Estado del Pago (*)</strong></label>
                     <InputSelect @bind-Value="Pago.Estado" class="form-select" disabled="@(PagoId == 0)">
 
                         @if (PagoId == 0)
@@ -131,13 +131,12 @@
     </EditForm>
 </div>
 
-
-<div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
+<div class="modal @ModalConfirmClass" tabindex="-1" style="display:@ModalConfirmDisplay;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">Confirmación de Pago</h5>
-                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+                <button type="button" class="btn-close" @onclick="CerrarModalConfirm"></button>
             </div>
             <div class="modal-body">
                 @if (Pago.EventoId > 0)
@@ -162,7 +161,7 @@
                 }
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModalConfirm">Cancelar</button>
                 <button type="button" class="btn btn-success" @onclick="ConfirmarGuardar" disabled="@(Pago.EventoId == 0)">
                     <span class="bi bi-floppy me-1"></span> @(PagoId == 0 ? "Registrar Pago" : "Guardar Cambios")
                 </button>
@@ -170,7 +169,33 @@
         </div>
     </div>
 </div>
-@if (ModalIsVisible)
+
+@if (ModalConfirmIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+<div class="modal @ModalSuccessClass" tabindex="-1" style="display:@ModalSuccessDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">¡Operación Exitosa!</h5>
+                <button type="button" class="btn-close" @onclick="RedirigirDespuesDeExito"></button>
+            </div>
+            <div class="modal-body">
+                <p><span class="bi bi-check-circle-fill text-success me-2"></span> El pago fue registrado con éxito.</p>
+                <p>¡Pase Feliz Dia!.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" @onclick="RedirigirDespuesDeExito">
+                    Aceptar y Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalSuccessIsVisible)
 {
     <div class="modal-backdrop fade show"></div>
 }
@@ -187,20 +212,35 @@
 
     public List<EventoDetalle> ListaEventos { get; set; } = new();
 
-    private bool ModalIsVisible { get; set; } = false;
-    private string ModalDisplay => ModalIsVisible ? "block" : "none";
-    private string ModalClass => ModalIsVisible ? "show" : "";
+    private bool ModalConfirmIsVisible { get; set; } = false;
+    private string ModalConfirmDisplay => ModalConfirmIsVisible ? "block" : "none";
+    private string ModalConfirmClass => ModalConfirmIsVisible ? "show" : "";
+    private bool ModalSuccessIsVisible { get; set; } = false;
+    private string ModalSuccessDisplay => ModalSuccessIsVisible ? "block" : "none";
+    private string ModalSuccessClass => ModalSuccessIsVisible ? "show" : "";
 
-    private void AbrirModal()
+
+    private void AbrirModalConfirm()
     {
-        ModalIsVisible = true;
+        ModalConfirmIsVisible = true;
         StateHasChanged();
     }
 
-    private void CerrarModal()
+    private void CerrarModalConfirm()
     {
-        ModalIsVisible = false;
+        ModalConfirmIsVisible = false;
         StateHasChanged();
+    }
+
+    private void AbrirModalSuccess()
+    {
+        ModalSuccessIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void RedirigirDespuesDeExito()
+    {
+        navigationManager.NavigateTo("/admin/dashboard", forceLoad: true);
     }
 
     protected override void OnInitialized()
@@ -249,18 +289,18 @@
             }
         }
 
-        AbrirModal();
+        AbrirModalConfirm();
     }
 
     public async Task ConfirmarGuardar()
     {
-        CerrarModal();
+        CerrarModalConfirm();
 
         var guardado = await PagosDetalleService.Guardar(Pago);
 
         if (guardado)
         {
-            navigationManager.NavigateTo("/admin/dashboard");
+            AbrirModalSuccess();
         }
     }
 
