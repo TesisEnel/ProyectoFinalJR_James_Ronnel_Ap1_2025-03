@@ -35,6 +35,17 @@
                 </div>
             </div>
 
+            <div class="row mb-4">
+                <div class="col-12 col-md-3">
+                    <label class="form-label"><strong>Fecha Desde</strong></label>
+                    <InputDate @bind-Value="FechaInicioFiltro" class="form-control" @onchange="Buscar" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label"><strong>Fecha Hasta</strong></label>
+                    <InputDate @bind-Value="FechaFinFiltro" class="form-control" @onchange="Buscar" />
+                </div>
+            </div>
+
             <div class="table-responsive">
                 @if (ListaEventos == null)
                 {
@@ -95,7 +106,6 @@
     </div>
 </div>
 
-@* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN *@
 <div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -139,6 +149,8 @@
 @code {
     public List<EventoDetalle> ListaEventos { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
+    public DateOnly? FechaInicioFiltro { get; set; }
+    public DateOnly? FechaFinFiltro { get; set; }
 
     private EventoDetalle? EventoAEliminar { get; set; }
     private bool ModalIsVisible { get; set; } = false;
@@ -188,25 +200,28 @@
 
     private async Task Buscar()
     {
-        if (string.IsNullOrWhiteSpace(ValorFiltro))
-        {
-            await CargarLista();
-            return;
-        }
-
-        var filtro = ValorFiltro.ToLower();
+        var filtroTexto = ValorFiltro?.ToLower() ?? string.Empty;
+        var inicio = FechaInicioFiltro;
+        var fin = FechaFinFiltro;
 
         ListaEventos = await EventoService.GetList(
-            e => e.Nombre.ToLower().Contains(filtro) ||
-                 e.Lugar.ToLower().Contains(filtro) ||
-                 (e.Descripcion != null && e.Descripcion.ToLower().Contains(filtro)) ||
-                 (e.TipoProveedor != null && e.TipoProveedor.Nombre.ToLower().Contains(filtro))
+            e => (string.IsNullOrWhiteSpace(filtroTexto) ||
+                  e.Nombre.ToLower().Contains(filtroTexto) ||
+                  e.Lugar.ToLower().Contains(filtroTexto) ||
+                  (e.Descripcion != null && e.Descripcion.ToLower().Contains(filtroTexto)) ||
+                  (e.TipoProveedor != null && e.TipoProveedor.Nombre.ToLower().Contains(filtroTexto)))
+                 &&
+                 (inicio == null || e.Fecha >= inicio)
+                 &&
+                 (fin == null || e.Fecha <= fin)
         );
     }
 
     private async Task Restablecer()
     {
         ValorFiltro = string.Empty;
+        FechaInicioFiltro = null;
+        FechaFinFiltro = null;
         await CargarLista();
     }
 }
