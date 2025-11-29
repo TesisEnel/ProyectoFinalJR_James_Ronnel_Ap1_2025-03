@@ -1,0 +1,6 @@
+﻿/* Definición del color Azul Marino más oscuro */
+.bg-Azul-Marino {
+    /* Color Azul Marino oscuro */
+    background-color: #01206E !important;
+    color: #ffffff; /* Asegura que el texto permanezca blanco */
+}

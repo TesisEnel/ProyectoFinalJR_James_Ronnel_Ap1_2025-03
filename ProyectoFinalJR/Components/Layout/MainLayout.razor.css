@@ -62,3 +62,9 @@
             background-color: #dc3545;
             color: #fff;
         }
+/* Definición del color Azul Marino personalizado */
+.bg-Azul-Marino {
+    /* Color Azul Marino (Ejemplo de código hexadecimal) */
+    background-color: #01206E !important;
+    color: #ffffff; /* Asegura que el texto permanezca blanco */
+}
