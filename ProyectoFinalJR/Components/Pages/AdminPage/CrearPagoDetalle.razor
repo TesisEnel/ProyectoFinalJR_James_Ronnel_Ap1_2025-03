@@ -8,6 +8,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using ProyectoFinalJR.Models
 @using ProyectoFinalJR.Services
+@using System.ComponentModel.DataAnnotations
 @inject PagosDetalleService PagosDetalleService
 @inject EventoDetalleService EventoService
 @inject NavigationManager navigationManager
@@ -19,7 +20,7 @@
         <DataAnnotationsValidator />
 
         <div class="card shadow-lg mx-auto" style="max-width: 550px;">
-            <div class="card-header text-center bg-info text-white">
+            <div class="card-header text-center text-white" style="background-color: #01206E;">
                 <h5 class="card-title m-0">
                     <span class="bi bi-cash-stack me-2"></span>
                     @(PagoId == 0 ? "Registrar Nuevo Pago" : $"Editar Pago ID: {Pago.PagoId}")
@@ -58,12 +59,32 @@
                     <InputSelect @bind-Value="Pago.Metodo" class="form-select">
                         <option value="">-- Seleccione Método --</option>
                         <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
-                        <option value="Transferencia">Transferencia Bancaria</option>
                         <option value="Efectivo">Efectivo</option>
                     </InputSelect>
                     <ValidationMessage For="(() => Pago.Metodo)" />
                 </div>
 
+                @if (Pago.Metodo == "Tarjeta")
+                {
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Número de Tarjeta (*)</strong></label>
+                        <InputText @bind-Value="InputTarjeta.NumeroTarjeta" class="form-control" maxlength="16" placeholder="0000 0000 0000 0000" />
+                        <ValidationMessage For="() => InputTarjeta.NumeroTarjeta" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><strong>Fecha de Vencimiento (MM/AA) (*)</strong></label>
+                            <InputText @bind-Value="InputTarjeta.FechaVencimiento" class="form-control" maxlength="5" placeholder="MM/AA" />
+                            <ValidationMessage For="() => InputTarjeta.FechaVencimiento" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><strong>CVV (*)</strong></label>
+                            <InputText @bind-Value="InputTarjeta.CVV" class="form-control" maxlength="4" placeholder="CVC/CVV" />
+                            <ValidationMessage For="() => InputTarjeta.CVV" />
+                        </div>
+                    </div>
+                }
                 <div class="mb-3">
                     <label class="form-label"><strong>Estado del Pago (*)</strong></label>
                     <InputSelect @bind-Value="Pago.Estado" class="form-select">
@@ -88,9 +109,9 @@
 
             <div class="card-footer text-center d-flex justify-content-between">
                 <a href="/admin/dashboard" class="btn btn-secondary">
-                    <span class="bi bi-arrow-left"></span> Volver 
+                    <span class="bi bi-arrow-left"></span> Volver
                 </a>
-                <button type="submit" class="btn btn-info text-white">
+                <button type="submit" class="btn btn-success">
                     <span class="bi bi-floppy"></span> Guardar Pago
                 </button>
             </div>
@@ -99,18 +120,81 @@
 </div>
 
 
+<div class="modal @ModalClass" tabindex="-1" style="display:@ModalDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Confirmación de Pago</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                @if (Pago.EventoId > 0)
+                {
+                    <p>Por favor, revisa los detalles del pago antes de confirmar la operación:</p>
+
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>Evento:</strong> @ListaEventos.FirstOrDefault(e => e.EventoId == Pago.EventoId)?.Nombre</li>
+                        <li class="list-group-item"><strong>Monto:</strong> @Pago.MontoPagado.ToString("C")</li>
+                        <li class="list-group-item"><strong>Método:</strong> @Pago.Metodo</li>
+                        <li class="list-group-item"><strong>Estado:</strong> @Pago.Estado</li>
+                        <li class="list-group-item"><strong>Fecha de Pago:</strong> @Pago.FechaPago.ToString("dd/MM/yyyy HH:mm")</li>
+                    </ul>
+
+                    <p class="text-danger small">
+                        ¿Confirmas el registro del pago?
+                    </p>
+                }
+                else
+                {
+                    <p class="text-danger">Debe seleccionar un evento válido para confirmar el pago.</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button type="button" class="btn btn-success" @onclick="ConfirmarGuardar" disabled="@(Pago.EventoId == 0)">
+                    <span class="bi bi-floppy me-1"></span> @(PagoId == 0 ? "Registrar Pago" : "Guardar Cambios")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@if (ModalIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+
 @code {
     [Parameter]
     public int PagoId { get; set; }
 
     public PagosDetalle Pago { get; set; } = new PagosDetalle();
     private EditContext editContext = default!;
+    private EditContext editContextTarjeta = default!;
+    [SupplyParameterFromForm] private InputTarjetaModel InputTarjeta { get; set; } = new();
 
     public List<EventoDetalle> ListaEventos { get; set; } = new();
+
+    private bool ModalIsVisible { get; set; } = false;
+    private string ModalDisplay => ModalIsVisible ? "block" : "none";
+    private string ModalClass => ModalIsVisible ? "show" : "";
+
+    private void AbrirModal()
+    {
+        ModalIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CerrarModal()
+    {
+        ModalIsVisible = false;
+        StateHasChanged();
+    }
 
     protected override void OnInitialized()
     {
         editContext = new EditContext(Pago);
+        editContextTarjeta = new EditContext(InputTarjeta);
     }
 
     protected override async Task OnParametersSetAsync()
@@ -138,12 +222,27 @@
         }
     }
 
-    public async Task Guardar()
+    public void Guardar()
     {
         if (!editContext.Validate())
         {
             return;
         }
+
+        if (Pago.Metodo == "Tarjeta")
+        {
+            if (!editContextTarjeta.Validate())
+            {
+                return;
+            }
+        }
+
+        AbrirModal();
+    }
+
+    public async Task ConfirmarGuardar()
+    {
+        CerrarModal();
 
         var guardado = await PagosDetalleService.Guardar(Pago);
 
@@ -153,7 +252,24 @@
         }
         else
         {
-            // Manejar error de guardado
+
         }
+    }
+
+    private sealed class InputTarjetaModel
+    {
+        [Required(ErrorMessage = "El número es obligatorio.")]
+        [StringLength(16, MinimumLength = 16, ErrorMessage = "Debe ingresar 16 dígitos.")]
+        [RegularExpression("^[0-9]*$", ErrorMessage = "Solo se permiten números.")]
+        public string? NumeroTarjeta { get; set; }
+
+        [Required(ErrorMessage = "La fecha es obligatoria.")]
+        [RegularExpression(@"^(0[1-9]|1[0-2])\/\d{2}$", ErrorMessage = "Formato MM/AA inválido.")]
+        public string? FechaVencimiento { get; set; }
+
+        [Required(ErrorMessage = "El CVV es obligatorio.")]
+        [StringLength(4, MinimumLength = 3, ErrorMessage = "Debe ingresar 3 o 4 dígitos.")]
+        [RegularExpression("^[0-9]*$", ErrorMessage = "Solo se permiten números.")]
+        public string? CVV { get; set; }
     }
 }
