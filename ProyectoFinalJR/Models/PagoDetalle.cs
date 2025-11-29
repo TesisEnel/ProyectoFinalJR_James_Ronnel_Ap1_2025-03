@@ -20,13 +20,12 @@ public class PagosDetalle
 
     [Required(ErrorMessage = "El método de pago es obligatorio.")]
     [StringLength(50, ErrorMessage = "El metodo no debe exceder los 50 caracteres.")]
-    public string Metodo { get; set; } = string.Empty; 
+    public string Metodo { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El estado del pago es obligatorio.")]
     [StringLength(50, ErrorMessage = "El estado no debe exceder los 50 caracteres.")]
-    public string Estado { get; set; } = "Pendiente"; 
+    public string Estado { get; set; } = "Pendiente";
 
     [ForeignKey("EventoId")]
     public EventoDetalle? Evento { get; set; }
-
 }
