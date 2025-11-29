@@ -20,7 +20,8 @@
         <DataAnnotationsValidator />
 
         <div class="card shadow-lg mx-auto" style="max-width: 550px;">
-            <div class="card-header text-center bg-warning text-dark">
+
+            <div class="card-header text-center text-white" style="background-color: #01206E;">
                 <h5 class="card-title m-0">
                     <span class="bi bi-lightbulb me-2"></span>
                     @(SugerenciaId == 0 ? "Enviar Nueva Sugerencia" : $"Editar Sugerencia ID: {Sugerencia.SugerenciaId}")
@@ -61,7 +62,8 @@
                 <a href="/admin/dashboard" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Cancelar
                 </a>
-                <button type="submit" class="btn btn-warning text-dark">
+
+                <button type="submit" class="btn btn-success">
                     <span class="bi bi-floppy"></span> @(SugerenciaId == 0 ? "Enviar Sugerencia" : "Guardar Cambios")
                 </button>
             </div>
@@ -81,7 +83,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
 
-    private string RedireccionUrl => SugerenciaId == 0 ? "/" : "/admin/sugerencias";
+    private string RedireccionUrl => SugerenciaId == 0 ? "/admin/dashboard" : "/admin/sugerencias";
 
     protected override void OnInitialized()
     {
