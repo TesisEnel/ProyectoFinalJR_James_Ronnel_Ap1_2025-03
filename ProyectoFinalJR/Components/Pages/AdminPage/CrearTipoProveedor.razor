@@ -18,7 +18,8 @@
         <DataAnnotationsValidator />
 
         <div class="card shadow-lg mx-auto" style="max-width: 600px;">
-            <div class="card-header text-center bg-primary text-white">
+
+            <div class="card-header text-center text-white" style="background-color: #01206E;">
                 <h5 class="card-title m-0">
                     <span class="bi bi-person-badge me-2"></span>
                     @(TipoProveedorId == 0 ? "Crear Nuevo Tipo de Proveedor" : $"Editar Tipo: {TipoProveedor.Nombre}")
@@ -49,7 +50,8 @@
                 <a href="/admin/proveedores" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Volver al Listado
                 </a>
-                <button type="submit" class="btn btn-primary">
+
+                <button type="submit" class="btn btn-success">
                     <span class="bi bi-floppy"></span> Guardar
                 </button>
             </div>
@@ -60,9 +62,9 @@
 
 @code {
     [Parameter]
-    public int TipoProveedorId { get; set; } 
+    public int TipoProveedorId { get; set; }
 
-    public TipoProveedor TipoProveedor { get; set; } = new TipoProveedor();
+    public TipoProveedor TipoProveedor { get; set; } = new TipoProveedor();
     private EditContext editContext = default!;
 
     protected override void OnInitialized()
@@ -70,25 +72,25 @@
         editContext = new EditContext(TipoProveedor);
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync()
     {
         if (TipoProveedorId > 0)
         {
-            var encontrado = await TipoProveedorService.Buscar(TipoProveedorId);
+            var encontrado = await TipoProveedorService.Buscar(TipoProveedorId);
 
             if (encontrado != null)
             {
                 TipoProveedor = encontrado;
-                editContext = new EditContext(TipoProveedor);
+                editContext = new EditContext(TipoProveedor);
             }
             else
             {
-                navigationManager.NavigateTo("/admin/proveedores");
+                navigationManager.NavigateTo("/admin/proveedores");
             }
         }
         else
         {
-            TipoProveedor = new TipoProveedor();
+            TipoProveedor = new TipoProveedor();
             editContext = new EditContext(TipoProveedor);
         }
     }
@@ -97,18 +99,18 @@
     {
         if (!editContext.Validate())
         {
-            return;
+            return;
         }
 
-        var creado = await TipoProveedorService.Guardar(TipoProveedor);
+        var creado = await TipoProveedorService.Guardar(TipoProveedor);
 
         if (creado)
         {
-            navigationManager.NavigateTo("/admin/proveedores");
+            navigationManager.NavigateTo("/admin/proveedores");
         }
         else
         {
-            Console.WriteLine("Ocurrió un error al intentar guardar el Tipo de Proveedor.");
+            Console.WriteLine("Ocurrió un error al intentar guardar el Tipo de Proveedor.");
         }
     }
 }
