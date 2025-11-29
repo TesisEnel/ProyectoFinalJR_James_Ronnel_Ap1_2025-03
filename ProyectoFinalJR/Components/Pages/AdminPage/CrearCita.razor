@@ -2,7 +2,7 @@
 @page "/admin/citas/editar/{CitaId:int}"
 @layout MainLayoutAdm
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin")] 
+@attribute [Authorize(Roles = "Admin")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -10,7 +10,7 @@
 @using ProyectoFinalJR.Models
 @using ProyectoFinalJR.Services
 @inject CitaService CitaService
-@inject EventoDetalleService EventoService 
+@inject EventoDetalleService EventoService
 @inject TipoProveedorService ProveedorService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -22,7 +22,7 @@
         <DataAnnotationsValidator />
 
         <div class="card shadow-lg mx-auto" style="max-width: 650px;">
-            <div class="card-header text-center bg-info text-white">
+            <div class="card-header text-center text-white" style="background-color: #01206E;">
                 <h5 class="card-title m-0">
                     <span class="bi bi-calendar-check me-2"></span>
                     @(CitaId == 0 ? "Agendar Nueva Cita" : $"Editar Cita ID: {Cita.CitaId}")
@@ -65,7 +65,7 @@
                 <div class="mb-4">
                     <label class="form-label"><strong>Proveedor Específico (Opcional)</strong></label>
                     <InputSelect @bind-Value="Cita.ProveedorId" class="form-select">
-                        <option value="">-- Seleccione Proveedor --</option> 
+                        <option value="">-- Seleccione Proveedor --</option>
                         @foreach (var proveedor in ListaProveedores)
                         {
                             <option value="@proveedor.TipoProveedorId">@proveedor.Nombre</option>
@@ -73,7 +73,7 @@
                     </InputSelect>
                     <ValidationMessage For="(() => Cita.ProveedorId)" />
                 </div>
-                
+
                 <div class="mb-3">
                     <label class="form-label text-muted">ID de Usuario Creador (UsuarioId)</label>
                     <InputText @bind-Value="Cita.UsuarioId" class="form-control form-control-sm" readonly />
@@ -95,13 +95,13 @@
 
 @code {
     [Parameter]
-    public int CitaId { get; set; } 
+    public int CitaId { get; set; }
 
     public Cita Cita { get; set; } = new Cita();
     private EditContext editContext = default!;
 
     public List<EventoDetalle> ListaEventos { get; set; } = new();
-    public List<TipoProveedor> ListaProveedores { get; set; } = new(); 
+    public List<TipoProveedor> ListaProveedores { get; set; } = new();
 
     private string? currentUserId;
     [CascadingParameter]
@@ -142,7 +142,7 @@
         }
         else
         {
-             navigationManager.NavigateTo("/admin/citas");
+            navigationManager.NavigateTo("/admin/citas");
         }
     }
 
@@ -155,7 +155,7 @@
 
         if (string.IsNullOrEmpty(Cita.UsuarioId))
         {
-            Cita.UsuarioId = currentUserId ?? "ErrorID"; 
+            Cita.UsuarioId = currentUserId ?? "ErrorID";
         }
 
         var creado = await CitaService.Guardar(Cita);
