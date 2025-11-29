@@ -32,6 +32,17 @@
                 </div>
             </div>
 
+            <div class="row mb-4">
+                <div class="col-12 col-md-3">
+                    <label class="form-label"><strong>Fecha Desde</strong></label>
+                    <InputDate @bind-Value="FechaInicioFiltro" class="form-control" @onchange="Buscar" />
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label"><strong>Fecha Hasta</strong></label>
+                    <InputDate @bind-Value="FechaFinFiltro" class="form-control" @onchange="Buscar" />
+                </div>
+            </div>
+
             <div class="table-responsive">
                 @if (ListaSugerencias == null)
                 {
@@ -127,6 +138,8 @@
 @code {
     public List<Sugerencia> ListaSugerencias { get; set; } = new();
     public string ValorFiltro { get; set; } = string.Empty;
+    public DateTime? FechaInicioFiltro { get; set; }
+    public DateTime? FechaFinFiltro { get; set; }
 
     private Sugerencia? SugerenciaAEliminar { get; set; }
     private bool ModalIsVisible { get; set; } = false;
@@ -176,23 +189,26 @@
 
     private async Task Buscar()
     {
-        if (string.IsNullOrWhiteSpace(ValorFiltro))
-        {
-            await CargarLista();
-            return;
-        }
-
-        var filtro = ValorFiltro.ToLower();
+        var filtroTexto = ValorFiltro?.ToLower() ?? string.Empty;
+        var inicio = FechaInicioFiltro;
+        var fin = FechaFinFiltro;
 
         ListaSugerencias = await SugerenciaService.GetList(
-            s => s.Asunto.ToLower().Contains(filtro) ||
-                 s.Descripcion.ToLower().Contains(filtro)
+            s => (string.IsNullOrWhiteSpace(filtroTexto) ||
+                 s.Asunto.ToLower().Contains(filtroTexto) ||
+                 s.Descripcion.ToLower().Contains(filtroTexto))
+                 &&
+                 (inicio == null || s.FechaCreacion >= inicio)
+                 &&
+                 (fin == null || s.FechaCreacion <= fin)
         );
     }
 
     private async Task Restablecer()
     {
         ValorFiltro = string.Empty;
+        FechaInicioFiltro = null;
+        FechaFinFiltro = null;
         await CargarLista();
     }
 }
