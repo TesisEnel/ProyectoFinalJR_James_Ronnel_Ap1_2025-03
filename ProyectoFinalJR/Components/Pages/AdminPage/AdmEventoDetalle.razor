@@ -1,0 +1,98 @@
+﻿@page "/admin/eventos/detalle/{EventoId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject EventoDetalleService EventoDetalleService
+@inject NavigationManager navigationManager
+
+<PageTitle>Detalle del Evento</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Detalle del Evento</h1>
+    </div>
+
+    @if (Evento == null)
+    {
+        <div class="alert alert-info">Cargando detalles o evento no encontrado...</div>
+    }
+    else
+    {
+        <div class="card shadow-lg">
+            <div class="card-header text-white" style="background-color: #01206E;">
+                <h5 class="card-title m-0">
+                    @Evento.Nombre
+                    <span class="badge bg-warning text-dark ms-2">@Evento.Estado</span>
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Información General</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>ID:</strong> @Evento.EventoId</li>
+                            <li><strong>Fecha:</strong> @Evento.Fecha.ToString("dd MMMM yyyy")</li>
+                            <li><strong>Hora:</strong> @Evento.Hora</li>
+                            <li><strong>Lugar:</strong> @Evento.Lugar</li>
+                            <li><strong>Usuario Creador ID:</strong> @Evento.UsuarioId</li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Clasificación y Finanzas</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Tipo de Evento:</strong> @Evento.TipoEvento?.Nombre</li>
+                            <li><strong>Tipo de Proveedor:</strong> @(Evento.TipoProveedor?.Nombre ?? "No Especificado")</li>
+                            <li><strong>Presupuesto Inicial:</strong> @Evento.PresupuestoInicial.ToString("C")</li>
+                            <li><strong>Estado:</strong> @Evento.Estado</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="text-primary border-bottom pb-2">Descripción Completa</h6>
+                    <p class="text-muted">
+                        @(string.IsNullOrWhiteSpace(Evento.Descripcion) ? "No hay descripción detallada." : Evento.Descripcion)
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="card-footer d-flex justify-content-between gap-2">
+
+                <a href="/admin/evento" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                </a>
+
+                <a href="/admin/eventos/editar/@Evento.EventoId" class="btn btn-primary">
+                    <span class="bi bi-pencil-square me-1"></span> Editar Evento
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int EventoId { get; set; }
+
+    public EventoDetalle? Evento { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (EventoId > 0)
+        {
+            Evento = await EventoDetalleService.Buscar(EventoId);
+        }
+
+        if (Evento == null && EventoId > 0)
+        {
+            navigationManager.NavigateTo("/admin/evento", forceLoad: true);
+        }
+    }
+}

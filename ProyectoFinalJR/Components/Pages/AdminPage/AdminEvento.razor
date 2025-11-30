@@ -58,7 +58,7 @@
                 else
                 {
                     <table class="table table-hover table-bordered mt-3 align-middle">
-                        <thead class="table-White">
+                        <thead class="table-white">
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre del Evento</th>
@@ -85,6 +85,12 @@
                                     <td>@evento.Estado</td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
+
+                                            <a href="/admin/eventos/detalle/@evento.EventoId"
+                                               class="btn btn-outline-info btn-sm bi bi-eye"
+                                               title="Ver Detalle">
+                                            </a>
+
                                             <a href="/admin/eventos/editar/@evento.EventoId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
                                             <button @onclick="() => AbrirModalEliminar(evento)"
                                                     class="btn btn-outline-danger btn-sm bi bi-trash"
