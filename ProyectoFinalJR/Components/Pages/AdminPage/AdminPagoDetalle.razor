@@ -1,0 +1,94 @@
+﻿@page "/admin/pagos/detalle/{PagoId:int}"
+@layout MainLayoutAdm
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using ProyectoFinalJR.Models
+@using ProyectoFinalJR.Services
+@inject PagosDetalleService PagosDetalleService
+@inject NavigationManager navigationManager
+
+<PageTitle>@(Pago == null ? "Cargando Detalle" : $"Detalle de Pago {Pago.PagoId}")</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Detalle de Transacción</h1>
+    </div>
+
+    @if (Pago == null)
+    {
+        <div class="alert alert-info">Cargando detalles o registro de pago no encontrado...</div>
+    }
+    else
+    {
+        <div class="card shadow-lg">
+
+            <div class="card-header text-white" style="background-color: #01206E;">
+                <h5 class="card-title m-0">
+                    Pago ID: @Pago.PagoId
+                    <span class="badge bg-@(Pago.Estado == "Pagado" ? "success" : Pago.Estado == "Rechazado" ? "danger" : "warning") text-white">
+                        @Pago.Estado
+                    </span>
+                </h5>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Detalles del Pago</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Monto Pagado:</strong> @Pago.MontoPagado.ToString("C")</li>
+                            <li><strong>Método:</strong> @Pago.Metodo</li>
+                            <li><strong>Fecha Pago:</strong> @Pago.FechaPago.ToString("dd MMMM yyyy HH:mm")</li>
+                            <li><strong>Evento Asociado ID:</strong> @Pago.EventoId</li>
+                            @if (!string.IsNullOrWhiteSpace(Pago.NumeroTarjeta))
+                            {
+                                <li><strong>Tarjeta:</strong> **** **** **** @(Pago.NumeroTarjeta.Length > 4 ? Pago.NumeroTarjeta.Substring(Pago.NumeroTarjeta.Length - 4) : Pago.NumeroTarjeta)</li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Vínculo con el Evento</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Evento Nombre:</strong> @Pago.Evento?.Nombre</li>
+                            <li><strong>Fecha del Evento:</strong> @Pago.Evento?.Fecha.ToString("dd MMMM yyyy")</li>
+                            <li><strong>Presupuesto Evento:</strong> @Pago.Evento?.PresupuestoInicial.ToString("C")</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer d-flex justify-content-end gap-2">
+                <a href="/admin/pagos" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                </a>
+                <a href="/admin/pagos/editar/@Pago.PagoId" class="btn btn-primary">
+                    <span class="bi bi-pencil-square me-1"></span> Editar Pago
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int PagoId { get; set; }
+
+    public PagosDetalle? Pago { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (PagoId > 0)
+        {
+            Pago = await PagosDetalleService.Buscar(PagoId);
+        }
+
+        if (Pago == null && PagoId > 0)
+        {
+            navigationManager.NavigateTo("/admin/pagos", forceLoad: true);
+        }
+    }
+}
