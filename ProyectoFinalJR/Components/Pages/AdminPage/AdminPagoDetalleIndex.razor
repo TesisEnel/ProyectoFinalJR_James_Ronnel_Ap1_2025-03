@@ -58,7 +58,7 @@
                 else
                 {
                     <table class="table table-hover table-bordered mt-3 align-middle">
-                        <thead class="table-White">
+                        <thead class="table-white">
                             <tr>
                                 <th>ID Pago</th>
                                 <th>Evento</th>
@@ -81,6 +81,12 @@
                                     <td>@pago.Estado</td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
+
+                                            <a href="/admin/pagos/detalle/@pago.PagoId"
+                                               class="btn btn-outline-info btn-sm bi bi-eye"
+                                               title="Ver Detalle">
+                                            </a>
+
                                             <a href="/admin/pagos/editar/@pago.PagoId" class="btn btn-outline-primary btn-sm bi bi-pencil-square" title="Editar"></a>
                                             <button @onclick="() => AbrirModalEliminar(pago)"
                                                     class="btn btn-outline-danger btn-sm bi bi-trash"
