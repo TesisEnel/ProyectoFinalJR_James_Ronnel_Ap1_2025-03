@@ -37,7 +37,7 @@
                 }
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Evento Asociado (*)</strong></label>
+                    <label class="form-label"><strong>Evento Asociado </strong></label>
                     <InputSelect @bind-Value="Pago.EventoId" class="form-select">
                         <option value="0">-- Seleccione Evento --</option>
                         @foreach (var evento in ListaEventos)
@@ -49,13 +49,13 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Monto Pagado (*)</strong></label>
+                    <label class="form-label"><strong>Monto Pagado </strong></label>
                     <InputNumber @bind-Value="Pago.MontoPagado" TValue="decimal" class="form-control" placeholder="0.00" />
                     <ValidationMessage For="(() => Pago.MontoPagado)" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label"><strong>Método de Pago (*)</strong></label>
+                    <label class="form-label"><strong>Método de Pago </strong></label>
                     <InputSelect @bind-Value="Pago.Metodo" class="form-select">
                         <option value="">-- Seleccione Método --</option>
                         <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
@@ -67,26 +67,26 @@
                 @if (Pago.Metodo == "Tarjeta")
                 {
                     <div class="mb-3">
-                        <label class="form-label"><strong>Número de Tarjeta (*)</strong></label>
-                        <InputText @bind-Value="InputTarjeta.NumeroTarjeta" class="form-control" maxlength="16" placeholder="0000 0000 0000 0000" />
-                        <ValidationMessage For="() => InputTarjeta.NumeroTarjeta" />
+                        <label class="form-label"><strong>Número de Tarjeta </strong></label>
+                        <InputText @bind-Value="Pago.NumeroTarjeta" class="form-control" maxlength="16" placeholder="0000 0000 0000 0000" />
+                        <ValidationMessage For="() => Pago.NumeroTarjeta" />
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label"><strong>Fecha de Vencimiento (MM/AA) (*)</strong></label>
-                            <InputText @bind-Value="InputTarjeta.FechaVencimiento" class="form-control" maxlength="5" placeholder="MM/AA" />
-                            <ValidationMessage For="() => InputTarjeta.FechaVencimiento" />
+                            <label class="form-label"><strong>Fecha de Vencimiento (MM/AA) </strong></label>
+                            <InputText @bind-Value="Pago.FechaVencimiento" class="form-control" maxlength="5" placeholder="MM/AA" />
+                            <ValidationMessage For="() => Pago.FechaVencimiento" />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label"><strong>CVV (*)</strong></label>
-                            <InputText @bind-Value="InputTarjeta.CVV" class="form-control" maxlength="4" placeholder="CVC/CVV" />
-                            <ValidationMessage For="() => InputTarjeta.CVV" />
+                            <label class="form-label"><strong>CVV </strong></label>
+                            <InputText @bind-Value="Pago.CVV" class="form-control" maxlength="4" placeholder="CVC/CVV" />
+                            <ValidationMessage For="() => Pago.CVV" />
                         </div>
                     </div>
                 }
                 <div class="mb-3">
-                    <label class="form-label"><strong>Estado del Pago (*)</strong></label>
+                    <label class="form-label"><strong>Estado del Pago </strong></label>
                     <InputSelect @bind-Value="Pago.Estado" class="form-select" disabled="@(PagoId == 0)">
 
                         @if (PagoId == 0)
@@ -130,6 +130,7 @@
         </div>
     </EditForm>
 </div>
+
 
 <div class="modal @ModalConfirmClass" tabindex="-1" style="display:@ModalConfirmDisplay;">
     <div class="modal-dialog modal-dialog-centered">
@@ -200,16 +201,12 @@
     <div class="modal-backdrop fade show"></div>
 }
 
-
 @code {
     [Parameter]
     public int PagoId { get; set; }
 
     public PagosDetalle Pago { get; set; } = new PagosDetalle();
     private EditContext editContext = default!;
-    private EditContext editContextTarjeta = default!;
-    [SupplyParameterFromForm] private InputTarjetaModel InputTarjeta { get; set; } = new();
-
     public List<EventoDetalle> ListaEventos { get; set; } = new();
 
     private bool ModalConfirmIsVisible { get; set; } = false;
@@ -246,7 +243,6 @@
     protected override void OnInitialized()
     {
         editContext = new EditContext(Pago);
-        editContextTarjeta = new EditContext(InputTarjeta);
     }
 
     protected override async Task OnParametersSetAsync()
@@ -281,14 +277,6 @@
             return;
         }
 
-        if (Pago.Metodo == "Tarjeta")
-        {
-            if (!editContextTarjeta.Validate())
-            {
-                return;
-            }
-        }
-
         AbrirModalConfirm();
     }
 
@@ -302,22 +290,5 @@
         {
             AbrirModalSuccess();
         }
-    }
-
-    private sealed class InputTarjetaModel
-    {
-        [Required(ErrorMessage = "El número es obligatorio.")]
-        [StringLength(16, MinimumLength = 16, ErrorMessage = "Debe ingresar 16 dígitos.")]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "Solo se permiten números.")]
-        public string? NumeroTarjeta { get; set; }
-
-        [Required(ErrorMessage = "La fecha es obligatoria.")]
-        [RegularExpression(@"^(0[1-9]|1[0-2])\/\d{2}$", ErrorMessage = "Formato MM/AA inválido.")]
-        public string? FechaVencimiento { get; set; }
-
-        [Required(ErrorMessage = "El CVV es obligatorio.")]
-        [StringLength(4, MinimumLength = 3, ErrorMessage = "Debe ingresar 3 o 4 dígitos.")]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "Solo se permiten números.")]
-        public string? CVV { get; set; }
     }
 }

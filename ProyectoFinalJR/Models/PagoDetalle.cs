@@ -25,6 +25,16 @@ public class PagosDetalle
     [Required(ErrorMessage = "El estado del pago es obligatorio.")]
     [StringLength(50, ErrorMessage = "El estado no debe exceder los 50 caracteres.")]
     public string Estado { get; set; } = "Pendiente";
+    [StringLength(16, MinimumLength = 16, ErrorMessage = "Debe ingresar 16 dígitos.")]
+    [RegularExpression("^[0-9]*$", ErrorMessage = "Solo se permiten números.")]
+    public string? NumeroTarjeta { get; set; }
+
+    [RegularExpression(@"^(0[1-9]|1[0-2])\/\d{2}$", ErrorMessage = "Formato MM/AA inválido.")]
+    public string? FechaVencimiento { get; set; }
+
+    [StringLength(4, MinimumLength = 3, ErrorMessage = "Debe ingresar 3 o 4 dígitos.")]
+    [RegularExpression("^[0-9]*$", ErrorMessage = "Solo se permiten números.")]
+    public string? CVV { get; set; }
 
     [ForeignKey("EventoId")]
     public EventoDetalle? Evento { get; set; }
