@@ -1,0 +1,75 @@
+﻿@page "/perfil"
+@attribute [Authorize(Roles = "Admin, Usuario")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using ProyectoFinalJR.Data
+@inject UserManager<ApplicationUser> UserManager
+
+<PageTitle>Mi Perfil</PageTitle>
+
+<div class="container-fluid">
+    <div class="card shadow-lg mx-auto" style="max-width: 700px;">
+        <div class="card-header text-white" style="background-color: #01206E;">
+            <h5 class="card-title m-0">
+                <span class="bi bi-person-circle me-2"></span> Mi Perfil de Cuenta
+            </h5>
+        </div>
+
+        <div class="card-body">
+            @if (User == null)
+            {
+                <div class="alert alert-info">Cargando datos del perfil...</div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Datos de Contacto</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Nombre:</strong> @User.Nombre</li>
+                            <li><strong>Email:</strong> @User.Email</li>
+                            <li><strong>Teléfono:</strong> @User.Telefono</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary border-bottom pb-2">Información Adicional (ID)</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>ID de Usuario:</strong> @User.Id</li>
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card-footer d-flex justify-content-end">
+            <a href="/Account/Manage" class="btn btn-warning">
+                <span class="bi bi-pencil me-1"></span> Administrar Datos
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+
+    public ApplicationUser? User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        var principal = authState.User;
+
+        if (principal.Identity?.IsAuthenticated == true)
+        {
+            var userId = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != null)
+            {
+                User = await UserManager.FindByIdAsync(userId);
+            }
+        }
+    }
+}
