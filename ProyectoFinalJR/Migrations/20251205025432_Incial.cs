@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ProyectoFinalJR.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class Incial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,6 +52,22 @@ namespace ProyectoFinalJR.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sugerencias",
+                columns: table => new
+                {
+                    SugerenciaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Asunto = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    UsuarioId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sugerencias", x => x.SugerenciaId);
                 });
 
             migrationBuilder.CreateTable(
@@ -212,12 +230,13 @@ namespace ProyectoFinalJR.Migrations
                     EventoId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TipoEventoId = table.Column<int>(type: "int", nullable: false),
+                    TipoProveedorId = table.Column<int>(type: "int", nullable: true),
                     Nombre = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Descripcion = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Fecha = table.Column<DateOnly>(type: "date", nullable: false),
                     Hora = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Lugar = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    PresupuestoInicial = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PresupuestoInicial = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Estado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UsuarioId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -230,6 +249,92 @@ namespace ProyectoFinalJR.Migrations
                         principalTable: "TiposEventos",
                         principalColumn: "TipoId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Eventos_TiposProveedores_TipoProveedorId",
+                        column: x => x.TipoProveedorId,
+                        principalTable: "TiposProveedores",
+                        principalColumn: "TipoProveedorId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Citas",
+                columns: table => new
+                {
+                    CitaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FechaCita = table.Column<DateOnly>(type: "date", nullable: false),
+                    HoraCita = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    UsuarioId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EventoId = table.Column<int>(type: "int", nullable: false),
+                    ProveedorId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Citas", x => x.CitaId);
+                    table.ForeignKey(
+                        name: "FK_Citas_Eventos_EventoId",
+                        column: x => x.EventoId,
+                        principalTable: "Eventos",
+                        principalColumn: "EventoId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Citas_TiposProveedores_ProveedorId",
+                        column: x => x.ProveedorId,
+                        principalTable: "TiposProveedores",
+                        principalColumn: "TipoProveedorId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PagosDetalle",
+                columns: table => new
+                {
+                    PagoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EventoId = table.Column<int>(type: "int", nullable: false),
+                    MontoPagado = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    FechaPago = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    Metodo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Estado = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    NumeroTarjeta = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: true),
+                    FechaVencimiento = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CVV = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PagosDetalle", x => x.PagoId);
+                    table.ForeignKey(
+                        name: "FK_PagosDetalle_Eventos_EventoId",
+                        column: x => x.EventoId,
+                        principalTable: "Eventos",
+                        principalColumn: "EventoId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "1", "a1b2c3d4-0001-4444-8888-000000000001", "Admin", "ADMIN" },
+                    { "2", "a1b2c3d4-0002-4444-8888-000000000002", "Usuario", "USUARIO" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "Nombre", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "Telefono", "TwoFactorEnabled", "UserName" },
+                values: new object[,]
+                {
+                    { "admin-user-001", 0, "admin-concurrency-static", "admin@system.com", true, false, null, "Administrador", "ADMIN@SYSTEM.COM", "ADMIN@SYSTEM.COM", "AQAAAAIAAYagAAAAEMnRieJLtO0k/Mv75oJw3AWMP/CFhqba42LJNnLiGlLXCmqmXFJ+MM9flIMz4PXa9g==", null, false, "admin-stamp-static", "8494527080", false, "admin@system.com" },
+                    { "normal-user-002", 0, "user-concurrency-static", "usuario@system.com", true, false, null, "", "USUARIO@SYSTEM.COM", "USUARIO@SYSTEM.COM", "AQAAAAIAAYagAAAAEMnRieJLtO0k/Mv75oJw3AWMP/CFhqba42LJNnLiGlLXCmqmXFJ+MM9flIMz4PXa9g==", null, false, "user-stamp-static", "", false, "usuario@system.com" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[,]
+                {
+                    { "1", "admin-user-001" },
+                    { "2", "normal-user-002" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -277,9 +382,29 @@ namespace ProyectoFinalJR.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Citas_EventoId",
+                table: "Citas",
+                column: "EventoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Citas_ProveedorId",
+                table: "Citas",
+                column: "ProveedorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Eventos_TipoEventoId",
                 table: "Eventos",
                 column: "TipoEventoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Eventos_TipoProveedorId",
+                table: "Eventos",
+                column: "TipoProveedorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PagosDetalle_EventoId",
+                table: "PagosDetalle",
+                column: "EventoId");
         }
 
         /// <inheritdoc />
@@ -304,10 +429,13 @@ namespace ProyectoFinalJR.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Eventos");
+                name: "Citas");
 
             migrationBuilder.DropTable(
-                name: "TiposProveedores");
+                name: "PagosDetalle");
+
+            migrationBuilder.DropTable(
+                name: "Sugerencias");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -316,7 +444,13 @@ namespace ProyectoFinalJR.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
+                name: "Eventos");
+
+            migrationBuilder.DropTable(
                 name: "TiposEventos");
+
+            migrationBuilder.DropTable(
+                name: "TiposProveedores");
         }
     }
 }
