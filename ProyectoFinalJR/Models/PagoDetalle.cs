@@ -28,6 +28,7 @@ public class PagosDetalle
     [StringLength(16, MinimumLength = 16, ErrorMessage = "Debe ingresar 16 dígitos.")]
     [RegularExpression("^[0-9]*$", ErrorMessage = "Solo se permiten números.")]
     public string? NumeroTarjeta { get; set; }
+    [Required(ErrorMessage = "La fecha del pago es obligatoria.")]
 
     [RegularExpression(@"^(0[1-9]|1[0-2])\/\d{2}$", ErrorMessage = "Formato MM/AA inválido.")]
     public string? FechaVencimiento { get; set; }

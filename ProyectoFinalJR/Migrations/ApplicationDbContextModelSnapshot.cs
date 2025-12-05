@@ -47,6 +47,22 @@ namespace ProyectoFinalJR.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1",
+                            ConcurrencyStamp = "a1b2c3d4-0001-4444-8888-000000000001",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "2",
+                            ConcurrencyStamp = "a1b2c3d4-0002-4444-8888-000000000002",
+                            Name = "Usuario",
+                            NormalizedName = "USUARIO"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -153,6 +169,18 @@ namespace ProyectoFinalJR.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "admin-user-001",
+                            RoleId = "1"
+                        },
+                        new
+                        {
+                            UserId = "normal-user-002",
+                            RoleId = "2"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -250,6 +278,44 @@ namespace ProyectoFinalJR.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "admin-user-001",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "admin-concurrency-static",
+                            Email = "admin@system.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            Nombre = "Administrador",
+                            NormalizedEmail = "ADMIN@SYSTEM.COM",
+                            NormalizedUserName = "ADMIN@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMnRieJLtO0k/Mv75oJw3AWMP/CFhqba42LJNnLiGlLXCmqmXFJ+MM9flIMz4PXa9g==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "admin-stamp-static",
+                            Telefono = "8494527080",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@system.com"
+                        },
+                        new
+                        {
+                            Id = "normal-user-002",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "user-concurrency-static",
+                            Email = "usuario@system.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            Nombre = "",
+                            NormalizedEmail = "USUARIO@SYSTEM.COM",
+                            NormalizedUserName = "USUARIO@SYSTEM.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMnRieJLtO0k/Mv75oJw3AWMP/CFhqba42LJNnLiGlLXCmqmXFJ+MM9flIMz4PXa9g==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "user-stamp-static",
+                            Telefono = "",
+                            TwoFactorEnabled = false,
+                            UserName = "usuario@system.com"
+                        });
                 });
 
             modelBuilder.Entity("ProyectoFinalJR.Models.Cita", b =>
@@ -366,9 +432,12 @@ namespace ProyectoFinalJR.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("FechaPago")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("FechaVencimiento")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Metodo")
@@ -410,7 +479,9 @@ namespace ProyectoFinalJR.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("UsuarioId")
                         .IsRequired()
