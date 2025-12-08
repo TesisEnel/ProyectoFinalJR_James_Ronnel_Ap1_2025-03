@@ -2,7 +2,7 @@
 @page "/admin/citas/editar/{CitaId:int}"
 @layout MainLayoutAdm
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, Usuario")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -81,8 +81,8 @@
             </div>
 
             <div class="card-footer text-center d-flex justify-content-between">
-                <a href="/admin/citas" class="btn btn-secondary">
-                    <span class="bi bi-arrow-left"></span> Volver al Listado
+                <a href="/admin/dashboard" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
                 </a>
                 <button type="submit" class="btn btn-success">
                     <span class="bi bi-floppy"></span> Guardar Cita
@@ -91,6 +91,73 @@
         </div>
     </EditForm>
 </div>
+
+<div class="modal @ModalConfirmClass" tabindex="-1" style="display:@ModalConfirmDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Confirmación de Cita</h5>
+                <button type="button" class="btn-close" @onclick="CerrarModalConfirm"></button>
+            </div>
+            <div class="modal-body">
+                @if (Cita.EventoId > 0)
+                {
+                    <p>Por favor, revisa los detalles de la cita antes de confirmar:</p>
+
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>Evento:</strong> @ListaEventos.FirstOrDefault(e => e.EventoId == Cita.EventoId)?.Nombre</li>
+                        <li class="list-group-item"><strong>Fecha/Hora:</strong> @Cita.FechaCita.ToString("dd/MM/yyyy") @Cita.HoraCita</li>
+                        <li class="list-group-item"><strong>Proveedor:</strong> @ListaProveedores.FirstOrDefault(p => p.TipoProveedorId == Cita.ProveedorId)?.Nombre</li>
+                    </ul>
+
+                    <p class="text-danger small">
+                        ¿Confirmas el @(CitaId == 0 ? "agendamiento" : "guardado") de esta cita?
+                    </p>
+                }
+                else
+                {
+                    <p class="text-danger">Debe seleccionar un evento válido para confirmar la cita.</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="CerrarModalConfirm">Cancelar</button>
+                <button type="button" class="btn btn-success" @onclick="ConfirmarGuardar" disabled="@(Cita.EventoId == 0)">
+                    <span class="bi bi-floppy me-1"></span> @(CitaId == 0 ? "Agendar Cita" : "Guardar Cambios")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalConfirmIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+<div class="modal @ModalSuccessClass" tabindex="-1" style="display:@ModalSuccessDisplay;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">¡Operación Exitosa!</h5>
+                <button type="button" class="btn-close" @onclick="RedirigirDespuesDeExito"></button>
+            </div>
+            <div class="modal-body">
+                <p><span class="bi bi-check-circle-fill text-success me-2"></span> La cita fue @(CitaId == 0 ? "agendada" : "actualizada") con éxito.</p>
+                <p>Serás redirigido al Dashboard.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" @onclick="RedirigirDespuesDeExito">
+                    Aceptar y Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ModalSuccessIsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+}
 
 
 @code {
@@ -107,6 +174,38 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
 
+    private bool ModalConfirmIsVisible { get; set; } = false;
+    private string ModalConfirmDisplay => ModalConfirmIsVisible ? "block" : "none";
+    private string ModalConfirmClass => ModalConfirmIsVisible ? "show" : "";
+
+    private bool ModalSuccessIsVisible { get; set; } = false;
+    private string ModalSuccessDisplay => ModalSuccessIsVisible ? "block" : "none";
+    private string ModalSuccessClass => ModalSuccessIsVisible ? "show" : "";
+
+
+    private void AbrirModalConfirm()
+    {
+        ModalConfirmIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CerrarModalConfirm()
+    {
+        ModalConfirmIsVisible = false;
+        StateHasChanged();
+    }
+
+    private void AbrirModalSuccess()
+    {
+        ModalSuccessIsVisible = true;
+        StateHasChanged();
+    }
+
+    private void RedirigirDespuesDeExito()
+    {
+        navigationManager.NavigateTo("/admin/dashboard", forceLoad: true);
+    }
+
     protected override void OnInitialized()
     {
         Cita.FechaCita = DateOnly.FromDateTime(DateTime.Now);
@@ -117,7 +216,7 @@
     {
         var authState = await authenticationStateTask;
         var user = authState.User;
-        currentUserId = user.FindFirst(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+        currentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         ListaEventos = await EventoService.GetList(e => true);
         ListaProveedores = await ProveedorService.GetList(p => true);
@@ -142,11 +241,11 @@
         }
         else
         {
-            navigationManager.NavigateTo("/admin/citas");
+            navigationManager.NavigateTo("/admin/dashboard");
         }
     }
 
-    public async Task Guardar()
+    public void Guardar()
     {
         if (!editContext.Validate())
         {
@@ -158,11 +257,23 @@
             Cita.UsuarioId = currentUserId ?? "ErrorID";
         }
 
+        AbrirModalConfirm();
+    }
+
+    public async Task ConfirmarGuardar()
+    {
+        CerrarModalConfirm();
+
+        if (!editContext.Validate())
+        {
+            return;
+        }
+
         var creado = await CitaService.Guardar(Cita);
 
         if (creado)
         {
-            navigationManager.NavigateTo("/admin/citas");
+            AbrirModalSuccess();
         }
     }
 }
